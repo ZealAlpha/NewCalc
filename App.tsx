@@ -10,6 +10,7 @@ import mobileAds, {
   AdEventType,
 } from 'react-native-google-mobile-ads';
 import './global.css';
+import Premium from './src/screens/premium';
 
 // Screens
 import Index from './src/screens/index';
@@ -83,6 +84,7 @@ export default function App() {
           <Stack.Navigator initialRouteName="Index" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Index" component={Index} />
             <Stack.Screen name="Layout" component={_layout} />
+            <Stack.Screen name="Premium" component={Premium} />
           </Stack.Navigator>
         </NavigationContainer>
       </View>

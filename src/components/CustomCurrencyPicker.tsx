@@ -10,7 +10,7 @@ import {
     Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 
 type Props = {
     currencyPair: string;
@@ -363,8 +363,9 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                                             }}
                                         >
                                             <FontAwesome6
-                                                name={favorites.includes(item.value) ? 'star' : 'star-o'}
+                                                name={favorites.includes(item.value) ? 'star' : 'star'}
                                                 size={20}
+                                                iconStyle={favorites.includes(item.value) ? 'solid' : 'regular'}
                                                 color={favorites.includes(item.value) ? '#facc15' : '#9ca3af'}
                                             />
                                         </Pressable>

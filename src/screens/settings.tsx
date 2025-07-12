@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, Text, Modal, Pressable, Linking, Share, Platform, ScrollView } from 'react-native';
 import { ThemeContext } from '../components/ThemeContext.tsx';
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 // import * as Application from 'expo-application';
 
 const Settings = () => {
@@ -40,7 +40,7 @@ const Settings = () => {
         <View className={`flex-1 justify-between px-4 py-8 ${isDark ? 'bg-black-300' : 'bg-white'}`}>
             <View className="items-center mt-10">
                 <View className="mb-9 flex-row items-center">
-                    <FontAwesome6 name={isDark ? 'moon-o' : 'sun-o'} size={24} color={isDark ? 'white' : 'black'} />
+                    <FontAwesome6 name={isDark ? 'moon' : 'sun'} iconStyle={isDark ? 'solid' : 'regular'} size={24} color={isDark ? 'white' : 'black'} />
                     <Text className={`ml-2 text-lg ${isDark ? 'text-white' : 'text-black-300'}`}>Dark Mode: </Text>
                     <Text className="ml-4 font-rubik-bold dark:text-white text-black-300">System</Text>
                 </View>
