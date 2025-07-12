@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "FXCalc.app"
-               BlueprintName = "FXCalc"
-               ReferencedContainer = "container:FXCalc.xcodeproj">
+               BuildableName = "FXCryptoCalculator.app"
+               BlueprintName = "FXCryptoCalculator"
+               ReferencedContainer = "container:FXCryptoCalculator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "FXCalcTests.xctest"
-               BlueprintName = "FXCalcTests"
-               ReferencedContainer = "container:FXCalc.xcodeproj">
+               BuildableName = "FXCryptoCalculatorTests.xctest"
+               BlueprintName = "FXCryptoCalculatorTests"
+               ReferencedContainer = "container:FXCryptoCalculator.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "FXCalc.app"
-            BlueprintName = "FXCalc"
-            ReferencedContainer = "container:FXCalc.xcodeproj">
+            BuildableName = "FXCryptoCalculator.app"
+            BlueprintName = "FXCryptoCalculator"
+            ReferencedContainer = "container:FXCryptoCalculator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "FXCalc.app"
-            BlueprintName = "FXCalc"
-            ReferencedContainer = "container:FXCalc.xcodeproj">
+            BuildableName = "FXCryptoCalculator.app"
+            BlueprintName = "FXCryptoCalculator"
+            ReferencedContainer = "container:FXCryptoCalculator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

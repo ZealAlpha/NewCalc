@@ -12,7 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		4BCB649A72BAE519795E538C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		5391DCD58D5F42679CC1F819 /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8C5B49CB1D91409CAF4569A6 /* SpaceMono-Regular.ttf */; };
-		70A98C614EB880BCDCC2B387 /* libPods-FXCalc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9008F76C8A108785AE5090FC /* libPods-FXCalc.a */; };
+		70A98C614EB880BCDCC2B387 /* libPods-FXCryptoCalculator.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9008F76C8A108785AE5090FC /* libPods-FXCryptoCalculator.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		A0B9F7EC877C4055ABDDBB11 /* Rubik-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9EB801730F2B4F5B8DD18F47 /* Rubik-Medium.ttf */; };
@@ -22,18 +22,18 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		13B07F961A680F5B00A75B9A /* FXCalc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FXCalc.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FXCalc/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FXCalc/Info.plist; sourceTree = "<group>"; };
-		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = FXCalc/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		13B07F961A680F5B00A75B9A /* FXCryptoCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "FXCryptoCalculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = "FXCryptoCalculator/Images.xcassets"; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = "FXCryptoCalculator/Info.plist"; sourceTree = "<group>"; };
+		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = FXCryptoCalculator/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13E4237CDE30450F9ED48F3F /* Rubik-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-Bold.ttf"; path = "../assets/fonts/Rubik-Bold.ttf"; sourceTree = "<group>"; };
-		3B0F9BF33C3684D81D816DF6 /* Pods-FXCalc.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FXCalc.release.xcconfig"; path = "Target Support Files/Pods-FXCalc/Pods-FXCalc.release.xcconfig"; sourceTree = "<group>"; };
+		3B0F9BF33C3684D81D816DF6 /* Pods-FXCryptoCalculator.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FXCryptoCalculator.release.xcconfig"; path = "Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator.release.xcconfig"; sourceTree = "<group>"; };
 		74EE419F1AC74216A1297A4F /* Rubik-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-Light.ttf"; path = "../assets/fonts/Rubik-Light.ttf"; sourceTree = "<group>"; };
-		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FXCalc/AppDelegate.swift; sourceTree = "<group>"; };
-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FXCalc/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FXCryptoCalculator/AppDelegate.swift; sourceTree = "<group>"; };
+		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = "FXCryptoCalculator/LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		8C5B49CB1D91409CAF4569A6 /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; };
-		9008F76C8A108785AE5090FC /* libPods-FXCalc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FXCalc.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9AEE7D0F3E24548F685E5BAB /* Pods-FXCalc.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FXCalc.debug.xcconfig"; path = "Target Support Files/Pods-FXCalc/Pods-FXCalc.debug.xcconfig"; sourceTree = "<group>"; };
+		9008F76C8A108785AE5090FC /* libPods-FXCryptoCalculator.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FXCryptoCalculator.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9AEE7D0F3E24548F685E5BAB /* Pods-FXCryptoCalculator.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FXCryptoCalculator.debug.xcconfig"; path = "Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator.debug.xcconfig"; sourceTree = "<group>"; };
 		9EB801730F2B4F5B8DD18F47 /* Rubik-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-Medium.ttf"; path = "../assets/fonts/Rubik-Medium.ttf"; sourceTree = "<group>"; };
 		DEF477842A8141089331F21D /* Rubik-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-SemiBold.ttf"; path = "../assets/fonts/Rubik-SemiBold.ttf"; sourceTree = "<group>"; };
 		E261A7B911A24A7490D00653 /* Rubik-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Rubik-ExtraBold.ttf"; path = "../assets/fonts/Rubik-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -46,14 +46,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				70A98C614EB880BCDCC2B387 /* libPods-FXCalc.a in Frameworks */,
+				70A98C614EB880BCDCC2B387 /* libPods-FXCryptoCalculator.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* FXCalc */ = {
+		13B07FAE1A68108700A75B9A /* FXCryptoCalculator */ = {
 			isa = PBXGroup;
 			children = (
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -62,14 +62,14 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 			);
-			name = FXCalc;
+			name = "FXCryptoCalculator";
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				9008F76C8A108785AE5090FC /* libPods-FXCalc.a */,
+				9008F76C8A108785AE5090FC /* libPods-FXCryptoCalculator.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -84,7 +84,7 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				13B07FAE1A68108700A75B9A /* FXCalc */,
+				13B07FAE1A68108700A75B9A /* FXCryptoCalculator */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
@@ -99,7 +99,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* FXCalc.app */,
+				13B07F961A680F5B00A75B9A /* FXCryptoCalculator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -107,8 +107,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				9AEE7D0F3E24548F685E5BAB /* Pods-FXCalc.debug.xcconfig */,
-				3B0F9BF33C3684D81D816DF6 /* Pods-FXCalc.release.xcconfig */,
+				9AEE7D0F3E24548F685E5BAB /* Pods-FXCryptoCalculator.debug.xcconfig */,
+				3B0F9BF33C3684D81D816DF6 /* Pods-FXCryptoCalculator.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -131,9 +131,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		13B07F861A680F5B00A75B9A /* FXCalc */ = {
+		13B07F861A680F5B00A75B9A /* FXCryptoCalculator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FXCalc" */;
+			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FXCryptoCalculator" */;
 			buildPhases = (
 				97027B6D157F0A9062B80830 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
@@ -148,9 +148,9 @@
 			);
 			dependencies = (
 			);
-			name = FXCalc;
-			productName = FXCalc;
-			productReference = 13B07F961A680F5B00A75B9A /* FXCalc.app */;
+			name = "FXCryptoCalculator";
+			productName = "FXCryptoCalculator";
+			productReference = 13B07F961A680F5B00A75B9A /* FXCryptoCalculator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -166,7 +166,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FXCalc" */;
+			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FXCryptoCalculator" */;
 			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -179,7 +179,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* FXCalc */,
+				13B07F861A680F5B00A75B9A /* FXCryptoCalculator */,
 			);
 		};
 /* End PBXProject section */
@@ -227,15 +227,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-resources-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-resources-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-resources.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		78173AD9E18C38E7F50F20B3 /* [CP-User] [RNGoogleMobileAds] Configuration */ = {
@@ -266,7 +266,7 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-FXCalc-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-FXCryptoCalculator-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -279,15 +279,15 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FXCalc/Pods-FXCalc-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FXCryptoCalculator/Pods-FXCryptoCalculator-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -306,13 +306,14 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9AEE7D0F3E24548F685E5BAB /* Pods-FXCalc.debug.xcconfig */;
+			baseConfigurationReference = 9AEE7D0F3E24548F685E5BAB /* Pods-FXCryptoCalculator.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = FXCalc/Info.plist;
+				INFOPLIST_FILE = "FXCryptoCalculator/Info.plist";
+             INFOPLIST_KEY_CFBundleDisplayName = "“FXCryptoCalculator”";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -324,8 +325,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = FXCalc;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.flilbare.afibie";
+				PRODUCT_NAME = "FXCryptoCalculator";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -334,12 +335,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B0F9BF33C3684D81D816DF6 /* Pods-FXCalc.release.xcconfig */;
+			baseConfigurationReference = 3B0F9BF33C3684D81D816DF6 /* Pods-FXCryptoCalculator.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = FXCalc/Info.plist;
+				INFOPLIST_FILE = "FXCryptoCalculator/Info.plist";
+             INFOPLIST_KEY_CFBundleDisplayName = "“FXCryptoCalculator”";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -351,8 +353,8 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = FXCalc;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.flilbare.afibie";
+				PRODUCT_NAME = "FXCryptoCalculator";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
@@ -513,7 +515,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FXCalc" */ = {
+		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FXCryptoCalculator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
@@ -522,7 +524,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FXCalc" */ = {
+		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FXCryptoCalculator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
