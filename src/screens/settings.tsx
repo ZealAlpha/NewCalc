@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { View, Text, Modal, Pressable, Linking, Share, Platform, ScrollView } from 'react-native';
 import { ThemeContext } from '../components/ThemeContext.tsx';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
-// import * as Application from 'expo-application';
 
 const Settings = () => {
     const { theme } = useContext(ThemeContext);
@@ -91,7 +90,7 @@ const Settings = () => {
                 <View className="flex-1 items-center justify-center bg-black/70 px-4">
                     <View className="bg-white dark:bg-black-300 rounded-xl p-6 w-full">
                         <Text className="text-black dark:text-white text-lg font-bold mb-2">{modalContent}</Text>
-                        <Text className="text-gray-700 dark:text-white mb-4">
+                        <View className="text-gray-700 dark:text-white mb-4 max-h-[70vh]">
                             {/* Sample content – you can update based on modalContent */}
                             {modalContent === 'About Us' && (
                                 <View className="space-y-4 text-gray-700 dark:text-white">
@@ -266,7 +265,7 @@ const Settings = () => {
                                     </Text>
                                 </ScrollView>
                             )}
-                        </Text>
+                        </View>
                         <Pressable onPress={() => setModalVisible(false)} className="self-end mt-2">
                             <Text className="text-blue-600 font-semibold">Close</Text>
                         </Pressable>

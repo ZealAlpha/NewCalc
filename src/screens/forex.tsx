@@ -165,155 +165,163 @@ const Forex = () => {
     }, [currencyPair, accountCurrency, API_KEY]);
 
     // Fixed pip value calculation
-    useEffect(() => {
-        if (!entryPrice || parseFloat(entryPrice) === 0) return;
+  // CORRECTED FOREX CALCULATOR LOGIC - Based on Document Formulas
 
-        const quoteCurrency = currencyPair.substring(3, 6);
-        const baseCurrency = currencyPair.substring(0, 3);
-        const isJPYQuote = quoteCurrency === 'JPY';
-        const isJPYBase = baseCurrency === 'JPY';
-        const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI'].some(sym => currencyPair.startsWith(sym));
-        const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG'].some(sym => currencyPair.startsWith(sym));
-        const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD'].some(sym => currencyPair.startsWith(sym));
+// Fixed pip value calculation - matches document exactly
+  useEffect(() => {
+    if (!entryPrice || parseFloat(entryPrice) === 0) return;
 
-        const pipSize = (isJPYQuote || isIndices || isCryptoPair || isCommodities) ? 0.01 : 0.0001;
+    const quoteCurrency = currencyPair.substring(3, 6);
+    const baseCurrency = currencyPair.substring(0, 3);
+    const isJPYQuote = quoteCurrency === 'JPY';
+    const isJPYBase = baseCurrency === 'JPY';
 
-        let standardLotSize;
-        if (isCryptoPair || isIndices) {
-            standardLotSize = 1;
-        } else if (isCommodities) {
-            standardLotSize = 100;
+    // Define instrument types
+    const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
+      .some(sym => currencyPair.startsWith(sym));
+    const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
+      .some(sym => currencyPair.startsWith(sym));
+    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
+      .some(sym => currencyPair.startsWith(sym));
+
+    // Standard lot size (always 100,000 for forex, 1 for others as per document)
+    const standardLotSize = (isCryptoPair || isIndices) ? 1 :
+      (isCommodities ? 100 : 100000);
+
+    let pipValue;
+
+    // Calculate pip value based on document formulas
+    if (isJPYQuote) {
+      // JPY pairs: PV = (1000 × Lot) / Exchange_Rate
+      if (accountCurrency === 'USD') {
+        pipValue = (1000 * 1) / parseFloat(entryPrice);
+      } else if (accountCurrency === 'JPY') {
+        pipValue = 1000 * 1; // 1000 JPY per pip
+      } else {
+        // Convert to account currency
+        pipValue = (1000 * 1 * parseFloat(quoteToAccountRate)) / parseFloat(entryPrice);
+      }
+    } else if (isJPYBase) {
+      // JPY base pairs: PV = (10 × Lot) × Exchange_Rate (for JPY/USD type)
+      if (accountCurrency === 'USD') {
+        pipValue = 10 * 1 * parseFloat(entryPrice);
+      } else if (accountCurrency === 'JPY') {
+        pipValue = 10 * 1 / parseFloat(entryPrice);
+      } else {
+        pipValue = 10 * 1 * parseFloat(quoteToAccountRate);
+      }
+    } else if (isCommodities) {
+      // Commodities: PV = (1 × Lot) / Exchange_Rate
+      if (accountCurrency === 'USD') {
+        pipValue = 1 * 1 / 1; // Usually USD denominated
+      } else {
+        pipValue = 1 * 1 * parseFloat(quoteToAccountRate);
+      }
+    } else if (isIndices) {
+      // Indices: PV = (0.01 × Lot) / Exchange_Rate
+      if (accountCurrency === 'USD') {
+        pipValue = 0.01 * 1 / 1;
+      } else if (quoteCurrency === 'JPY' && accountCurrency === 'USD') {
+        // Special case for JP225 - convert from JPY to USD
+        pipValue = 0.01 * 1 / parseFloat(entryPrice);
+      } else {
+        pipValue = 0.01 * 1 * parseFloat(quoteToAccountRate);
+      }
+    } else {
+      // Standard forex pairs: PV = (10 × Lot) / Exchange_Rate
+      if (accountCurrency === quoteCurrency) {
+        pipValue = 10; // Direct quote currency (e.g., accountCurrency = EUR, quoteCurrency = EUR)
+      } else if (accountCurrency === 'USD') {
+        if (quoteCurrency !== 'USD') {
+          pipValue = 10 / parseFloat(entryPrice); // e.g., USD/CHF → converts to USD
         } else {
-            standardLotSize = 100000;
+          pipValue = 10; // e.g., EUR/USD → $10 per pip
         }
+      } else {
+        pipValue = 10 * parseFloat(quoteToAccountRate); // Non-USD account currency, convert via rate
+      }
+    }
 
-        let pipValue;
+    setPipValuePerLot(pipValue.toFixed(2));
+  }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate]);
 
-        // For JPY pairs, we need special handling
-        if (isJPYQuote) {
-            // For USD/JPY where quote is JPY and account is USD
-            // Pip value = (0.01 * 100000) / exchange_rate = 1000 / 144.767 = 6.907
-            if (accountCurrency === baseCurrency) {
-                // Base currency matches account currency (e.g., USD/JPY with USD account)
-                pipValue = (pipSize * standardLotSize) / parseFloat(entryPrice);
-            } else if (accountCurrency === quoteCurrency) {
-                // Quote currency matches account currency (e.g., EUR/JPY with JPY account)
-                pipValue = pipSize * standardLotSize;
-            } else {
-                // Neither base nor quote matches account currency
-                pipValue = (pipSize * standardLotSize * parseFloat(quoteToAccountRate)) / parseFloat(entryPrice);
-            }
-        } else if (isJPYBase) {
-            // For JPY/USD where base is JPY
-            if (accountCurrency === quoteCurrency) {
-                // Quote currency matches account currency
-                pipValue = pipSize * standardLotSize;
-            } else if (accountCurrency === baseCurrency) {
-                // Base currency matches account currency
-                pipValue = (pipSize * standardLotSize) * parseFloat(entryPrice);
-            } else {
-                // Neither matches account currency
-                pipValue = (pipSize * standardLotSize) * parseFloat(quoteToAccountRate);
-            }
-        } else {
-            // Standard forex pairs (no JPY involved)
-            if (quoteCurrency === accountCurrency) {
-                pipValue = pipSize * standardLotSize;
-            } else {
-                pipValue = (pipSize * standardLotSize) * parseFloat(quoteToAccountRate);
-            }
-        }
+// Fixed position calculation - matches document formula exactly
+  const calculatePosition = useCallback(() => {
+    const ab = parseFloat(accountBalance) || 0;
+    const rPct = parseFloat(riskPercentage ? riskPercentage.replace('%', '') : '0') || 0;
+    const ra = parseFloat(riskAmount) || 0;
+    const slPips = parseFloat(stopLossPips) || 0;
+    const pv = parseFloat(pipValuePerLot) || 0;
+    const ep = parseFloat(entryPrice) || 0;
+    const slPrice = parseFloat(stopLossPrice) || 0;
 
-        setPipValuePerLot(pipValue.toFixed(2));
-    }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate]);
+    const quoteCurrency = currencyPair.substring(3, 6);
+    const isJPYQuote = quoteCurrency === 'JPY';
 
-// Fixed position calculation
-    const calculatePosition = useCallback(() => {
-        // Parse all input values
-        const ab = parseFloat(accountBalance) || 0;
-        const rPct = parseFloat(riskPercentage ? riskPercentage.replace('%', '') : '0') || 0;
-        const ra = parseFloat(riskAmount) || 0;
-        const slPips = parseFloat(stopLossPips) || 0;
-        const pv = parseFloat(pipValuePerLot) || 0;
-        const ep = parseFloat(entryPrice) || 0;
-        const slPrice = parseFloat(stopLossPrice) || 0;
-        const quoteCurrency = currencyPair.substring(3, 6);
-        const isJPYQuote = quoteCurrency === 'JPY';
+    // Define instrument types
+    const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
+      .some(sym => currencyPair.startsWith(sym));
+    const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
+      .some(sym => currencyPair.startsWith(sym));
+    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
+      .some(sym => currencyPair.startsWith(sym));
 
-        // Calculate risk amount if risk percentage is provided (but only if riskAmount is empty)
-        let calculatedRiskAmount = ra;
-        if (riskPercentage && ab > 0 && !riskAmount) {
-            calculatedRiskAmount = (ab * rPct) / 100;
-            setRiskAmount(calculatedRiskAmount.toFixed(2));
-        } else if (riskAmount && ab > 0 && !riskPercentage) {
-            // Calculate risk percentage if risk amount is provided (but only if riskPercentage is empty)
-            const calculatedRiskPct = (ra / ab) * 100;
-            setRiskPercentage(calculatedRiskPct.toFixed(2) + '%');
-        }
+    // Calculate risk amount if risk percentage is provided
+    let calculatedRiskAmount = ra;
+    if (riskPercentage && ab > 0 && !riskAmount) {
+      calculatedRiskAmount = (ab * rPct) / 100;
+      setRiskAmount(calculatedRiskAmount.toFixed(2));
+    } else if (riskAmount && ab > 0 && !riskPercentage) {
+      const calculatedRiskPct = (ra / ab) * 100;
+      setRiskPercentage(calculatedRiskPct.toFixed(2) + '%');
+    }
 
-        // Calculate stop loss pips if entry price and stop loss price are provided (but only if stopLossPips is empty)
-        let calculatedSlPips = slPips;
-        const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG'].some(sym => currencyPair.startsWith(sym));
-        const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI'].some(sym => currencyPair.startsWith(sym));
-        const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD'].some(sym => currencyPair.startsWith(sym));
+    // Calculate stop loss pips - matches document formulas
+    let calculatedSlPips = slPips;
+    if (ep > 0 && slPrice > 0 && !stopLossPips) {
+      if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
+        // Document shows: SLP = (E-SL) × 100
+        calculatedSlPips = Math.abs(ep - slPrice) * 100;
+      } else {
+        // Document shows: SLP = (E-SL) × 10,000
+        calculatedSlPips = Math.abs(ep - slPrice) * 10000;
+      }
+      setStopLossPips(calculatedSlPips.toFixed(2));
+    } else if (slPips > 0 && ep > 0 && !stopLossPrice) {
+      // Calculate stop loss price from pips
+      let calculatedSlPrice;
+      const direction = -1; // Assume long position (adjust as needed)
 
-        if (ep > 0 && slPrice > 0 && !stopLossPips) {
-            if (isCryptoPair) {
-                calculatedSlPips = Math.abs(ep - slPrice) * 100;
-            } else if (isJPYQuote) {
-                calculatedSlPips = Math.abs(ep - slPrice) * 100; // JPY pairs: 1 pip = 0.01
-            } else if (isIndices || isCommodities) {
-                calculatedSlPips = Math.abs(ep - slPrice) * 100;
-            } else {
-                calculatedSlPips = Math.abs(ep - slPrice) * 10000; // Other forex pairs: 1 pip = 0.0001
-            }
-            setStopLossPips(calculatedSlPips.toFixed(2));
-        } else if (slPips > 0 && ep > 0 && !stopLossPrice) {
-            let calculatedSlPrice;
+      if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
+        calculatedSlPrice = ep + (direction * calculatedSlPips / 100);
+      } else {
+        calculatedSlPrice = ep + (direction * calculatedSlPips / 10000);
+      }
 
-            if (isCryptoPair) {
-                calculatedSlPrice = ep - slPips;
-            } else {
-                // Use a basic direction logic: assume long if price > 1
-                const direction = ep > 1.0 ? -1 : 1;
+      setStopLossPrice(calculatedSlPrice.toFixed(isJPYQuote ? 3 : 5));
+    }
 
-                if (isJPYQuote) {
-                    calculatedSlPrice = ep + (direction * calculatedSlPips / 100);
-                } else {
-                    calculatedSlPrice = ep + (direction * calculatedSlPips / 10000);
-                }
-            }
+    // CORRECTED: Calculate position size using document formula
+    // Formula: SLS = r/(SLP×PV)
+    if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
+      const standardLotsResult = calculatedRiskAmount / (calculatedSlPips * pv);
 
-            // Set formatted stop loss price
-            if (isCryptoPair) {
-                setStopLossPrice(calculatedSlPrice.toFixed(2));
-            } else {
-                setStopLossPrice(isJPYQuote ? calculatedSlPrice.toFixed(3) : calculatedSlPrice.toFixed(5));
-            }
-        }
+      setStandardLots(standardLotsResult.toFixed(2));
+      setMiniLots((standardLotsResult * 10).toFixed(1));
+      setMicroLots((standardLotsResult * 100).toFixed(0));
 
-        // FIXED: Calculate position size if all required inputs are available
-        if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
-            // Correct formula: Units = Risk Amount / (Stop Loss Pips * Pip Value per Unit)
-            // Since pip value is per standard lot (100,000 units), we need to adjust
-            const pipValuePerUnit = pv / 100000;
-            const unitResult = calculatedRiskAmount / (calculatedSlPips * pipValuePerUnit);
-
-            setUnits(Math.round(unitResult).toString());
-
-            // Convert units to different lot sizes
-            const standardLotsValue = unitResult / 100000;
-            setStandardLots(standardLotsValue.toFixed(2));
-            setMiniLots((standardLotsValue * 10).toFixed(1));
-            setMicroLots(Math.round(standardLotsValue * 100).toString());
-        } else {
-            // Reset position size values if inputs are missing
-            setUnits('0');
-            setStandardLots('0');
-            setMiniLots('0');
-            setMicroLots('0');
-        }
-    }, [accountBalance, riskPercentage, riskAmount, stopLossPips, entryPrice, stopLossPrice, pipValuePerLot, currencyPair]);
+      // Convert to units (standard lots × 100,000 for forex)
+      const lotMultiplier = (isCryptoPair || isIndices) ? 1 :
+        (isCommodities ? 100 : 100000);
+      const unitsResult = standardLotsResult * lotMultiplier;
+      setUnits(Math.round(unitsResult).toString());
+    } else {
+      setUnits('0');
+      setStandardLots('0');
+      setMiniLots('0');
+      setMicroLots('0');
+    }
+  }, [accountBalance, riskPercentage, riskAmount, stopLossPips, entryPrice, stopLossPrice, pipValuePerLot, currencyPair]);
 
     const handleAccountBalanceChange = (value: React.SetStateAction<string>) => {
         setAccountBalance(value);
@@ -474,19 +482,20 @@ const Forex = () => {
                     <View className="flex-1">
                         <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Entry Price</Text>
 
-                        <View className="relative">
+                          <View className="relative">
                             <TextInput
-                                value={entryPrice ? parseFloat(entryPrice).toString() : ''}
-                                className="p-4 pr-10 border border-primary-100 rounded-md text-black dark:text-white"
-                                placeholder="Auto-filled entry price"
-                                onChangeText={(text: React.SetStateAction<string>) => {
-                                    setEntryPrice(text);
-                                    setIsEntryPriceManuallyEdited(true);
-                                }}
-                                keyboardType="numeric"
+                              value={entryPrice}
+                              onChangeText={(text) => {
+                                setEntryPrice(text);
+                                setIsEntryPriceManuallyEdited(true);
+                              }}
+                              keyboardType="decimal-pad"
+                              placeholder="Auto-filled entry price"
+                              className="p-4 pr-10 border border-primary-100 rounded-md text-black dark:text-white"
                             />
 
-                            <View className="absolute right-3 top-1/2 -translate-y-1/2">
+
+                          <View className="absolute right-3 top-1/2 -translate-y-1/2">
                                 {loading ? (
                                     <ActivityIndicator size="small" color="#0B6623" />
                                 ) : (
