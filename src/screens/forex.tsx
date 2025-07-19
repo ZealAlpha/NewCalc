@@ -43,7 +43,21 @@ const Forex = () => {
         }
     };
 
-    const [accountBalance, setAccountBalance] = useState('');
+    const indexQuoteCurrencies: Record<string, string> = {
+      '^DJI': 'USD',     // US30
+      '^SPX': 'USD',     // SP500
+      '^AXJO': 'AUD',    // AUS200
+      '^N225': 'JPY',    // JP225
+      '^FTSE': 'GBP',    // UK100
+      '^IBEX': 'EUR',    // IBEX35
+      '^HSI': 'HKD',     // HSI50
+      '^XNDX': 'USD',    // NAS100
+      '^GDAXI': 'EUR',   // GDAXI
+      '^FCHI': 'EUR',    // FCH140
+    };
+
+
+  const [accountBalance, setAccountBalance] = useState('');
     const [riskPercentage, setRiskPercentage] = useState('');
     const [riskAmount, setRiskAmount] = useState('');
     const [stopLossPips, setStopLossPips] = useState('');
@@ -55,7 +69,7 @@ const Forex = () => {
     const [miniLots, setMiniLots] = useState('0');
     const [microLots, setMicroLots] = useState('0');
     const [loading, setLoading] = useState(false);
-    const [quoteToAccountRate, setQuoteToAccountRate] = useState('1');  // New state to store conversion rate
+    const [quoteToAccountRate, setQuoteToAccountRate] = useState('1');
 
     const API_KEY = 'HdJ6P9Xswe51x5KLWiCORfvPc1cDlnKJ';
 
@@ -81,7 +95,6 @@ const Forex = () => {
     const indicesPairs = ["^DJI", "^SPX", "^AXJO", "^N225", "^FTSE", "^IBEX", "^HSI", "^XNDX", "^GDAXI", "^FCHI"];
 
     const fetchExchangeRate = useCallback(async (pair: string) => {
-        // Only use cached rate or fetch new one if user hasn't manually edited
         if (!isEntryPriceManuallyEdited) {
             const cached = getCachedRate(pair);
             if (cached) {
@@ -91,7 +104,6 @@ const Forex = () => {
 
             setLoading(true);
             try {
-                // Determine endpoint based on pair type
                 const isIndex = indicesPairs.includes(pair);
                 const url = isIndex
                     ? `https://financialmodelingprep.com/stable/quote?symbol=${pair}&apikey=${API_KEY}`
@@ -122,7 +134,6 @@ const Forex = () => {
 
 
     const handleRefreshRate = useCallback(() => {
-        // Force refresh by resetting the manual edit flag
         setIsEntryPriceManuallyEdited(false);
         fetchExchangeRate(currencyPair);
     }, [currencyPair, fetchExchangeRate]);
@@ -135,12 +146,10 @@ const Forex = () => {
         setIsEntryPriceManuallyEdited(false);
     }, [currencyPair]);
 
-    // Fetch conversion rate for pip value calculation
     useEffect(() => {
-        const quoteCurrency = currencyPair.substring(3, 6);
+      const quoteCurrency = indexQuoteCurrencies[currencyPair] || currencyPair.substring(3, 6)
 
-        // Only fetch if quote currency differs from account currency
-        if (quoteCurrency !== accountCurrency) {
+      if (quoteCurrency !== accountCurrency) {
             setLoading(true);
             const pair = `${quoteCurrency}${accountCurrency}`;
 
@@ -160,14 +169,10 @@ const Forex = () => {
                 })
                 .finally(() => setLoading(false));
         } else {
-            setQuoteToAccountRate('1'); // Same currency, rate is 1:1
+            setQuoteToAccountRate('1');
         }
     }, [currencyPair, accountCurrency, API_KEY]);
 
-    // Fixed pip value calculation
-  // CORRECTED FOREX CALCULATOR LOGIC - Based on Document Formulas
-
-// Fixed pip value calculation - matches document exactly
   useEffect(() => {
     if (!entryPrice || parseFloat(entryPrice) === 0) return;
 
@@ -176,7 +181,6 @@ const Forex = () => {
     const isJPYQuote = quoteCurrency === 'JPY';
     const isJPYBase = baseCurrency === 'JPY';
 
-    // Define instrument types
     const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
       .some(sym => currencyPair.startsWith(sym));
     const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
@@ -184,68 +188,62 @@ const Forex = () => {
     const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
       .some(sym => currencyPair.startsWith(sym));
 
-    // Standard lot size (always 100,000 for forex, 1 for others as per document)
     const standardLotSize = (isCryptoPair || isIndices) ? 1 :
       (isCommodities ? 100 : 100000);
 
     let pipValue;
 
-    // Calculate pip value based on document formulas
     if (isJPYQuote) {
-      // JPY pairs: PV = (1000 × Lot) / Exchange_Rate
-      if (accountCurrency === 'USD') {
-        pipValue = (1000 * 1) / parseFloat(entryPrice);
+      if (accountCurrency === quoteCurrency) {
+        pipValue = 1000;
+      } else if (accountCurrency === 'USD') {
+        pipValue = 1000 * parseFloat(quoteToAccountRate);
       } else if (accountCurrency === 'JPY') {
-        pipValue = 1000 * 1; // 1000 JPY per pip
+        pipValue = 1000;
       } else {
-        // Convert to account currency
-        pipValue = (1000 * 1 * parseFloat(quoteToAccountRate)) / parseFloat(entryPrice);
+        pipValue = (1000 * parseFloat(quoteToAccountRate)) / parseFloat(entryPrice);
       }
     } else if (isJPYBase) {
-      // JPY base pairs: PV = (10 × Lot) × Exchange_Rate (for JPY/USD type)
-      if (accountCurrency === 'USD') {
-        pipValue = 10 * 1 * parseFloat(entryPrice);
+      if (accountCurrency === quoteCurrency) {
+        pipValue = 10 * parseFloat(entryPrice);
+      } else if (accountCurrency === 'USD') {
+        pipValue = 10 * parseFloat(entryPrice);
       } else if (accountCurrency === 'JPY') {
-        pipValue = 10 * 1 / parseFloat(entryPrice);
+        pipValue = 10 / parseFloat(entryPrice);
       } else {
-        pipValue = 10 * 1 * parseFloat(quoteToAccountRate);
+        pipValue = 10 * parseFloat(quoteToAccountRate);
       }
     } else if (isCommodities) {
-      // Commodities: PV = (1 × Lot) / Exchange_Rate
-      if (accountCurrency === 'USD') {
-        pipValue = 1 * 1 / 1; // Usually USD denominated
+      if (accountCurrency === quoteCurrency) {
+        pipValue = 1;
+      } else if (accountCurrency === 'USD') {
+        pipValue = 1;
       } else {
-        pipValue = 1 * 1 * parseFloat(quoteToAccountRate);
+        pipValue = parseFloat(quoteToAccountRate);
       }
     } else if (isIndices) {
-      // Indices: PV = (0.01 × Lot) / Exchange_Rate
-      if (accountCurrency === 'USD') {
-        pipValue = 0.01 * 1 / 1;
-      } else if (quoteCurrency === 'JPY' && accountCurrency === 'USD') {
-        // Special case for JP225 - convert from JPY to USD
-        pipValue = 0.01 * 1 / parseFloat(entryPrice);
+      if (accountCurrency === quoteCurrency) {
+        pipValue = 0.01;
       } else {
-        pipValue = 0.01 * 1 * parseFloat(quoteToAccountRate);
+        pipValue = 0.01 * parseFloat(quoteToAccountRate);
       }
     } else {
-      // Standard forex pairs: PV = (10 × Lot) / Exchange_Rate
       if (accountCurrency === quoteCurrency) {
-        pipValue = 10; // Direct quote currency (e.g., accountCurrency = EUR, quoteCurrency = EUR)
+        pipValue = 10;
       } else if (accountCurrency === 'USD') {
-        if (quoteCurrency !== 'USD') {
-          pipValue = 10 / parseFloat(entryPrice); // e.g., USD/CHF → converts to USD
+        if (quoteCurrency === 'USD') {
+          pipValue = 10;
         } else {
-          pipValue = 10; // e.g., EUR/USD → $10 per pip
+          pipValue = 10 * parseFloat(quoteToAccountRate);
         }
       } else {
-        pipValue = 10 * parseFloat(quoteToAccountRate); // Non-USD account currency, convert via rate
+        pipValue = 10 * parseFloat(quoteToAccountRate);
       }
     }
 
     setPipValuePerLot(pipValue.toFixed(2));
   }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate]);
 
-// Fixed position calculation - matches document formula exactly
   const calculatePosition = useCallback(() => {
     const ab = parseFloat(accountBalance) || 0;
     const rPct = parseFloat(riskPercentage ? riskPercentage.replace('%', '') : '0') || 0;
@@ -258,7 +256,6 @@ const Forex = () => {
     const quoteCurrency = currencyPair.substring(3, 6);
     const isJPYQuote = quoteCurrency === 'JPY';
 
-    // Define instrument types
     const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
       .some(sym => currencyPair.startsWith(sym));
     const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
@@ -266,7 +263,6 @@ const Forex = () => {
     const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
       .some(sym => currencyPair.startsWith(sym));
 
-    // Calculate risk amount if risk percentage is provided
     let calculatedRiskAmount = ra;
     if (riskPercentage && ab > 0 && !riskAmount) {
       calculatedRiskAmount = (ab * rPct) / 100;
@@ -276,7 +272,6 @@ const Forex = () => {
       setRiskPercentage(calculatedRiskPct.toFixed(2) + '%');
     }
 
-    // Calculate stop loss pips - matches document formulas
     let calculatedSlPips = slPips;
     if (ep > 0 && slPrice > 0 && !stopLossPips) {
       if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
@@ -288,9 +283,8 @@ const Forex = () => {
       }
       setStopLossPips(calculatedSlPips.toFixed(2));
     } else if (slPips > 0 && ep > 0 && !stopLossPrice) {
-      // Calculate stop loss price from pips
       let calculatedSlPrice;
-      const direction = -1; // Assume long position (adjust as needed)
+      const direction = -1;
 
       if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
         calculatedSlPrice = ep + (direction * calculatedSlPips / 100);
@@ -301,8 +295,6 @@ const Forex = () => {
       setStopLossPrice(calculatedSlPrice.toFixed(isJPYQuote ? 3 : 5));
     }
 
-    // CORRECTED: Calculate position size using document formula
-    // Formula: SLS = r/(SLP×PV)
     if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
       const standardLotsResult = calculatedRiskAmount / (calculatedSlPips * pv);
 
@@ -310,7 +302,6 @@ const Forex = () => {
       setMiniLots((standardLotsResult * 10).toFixed(1));
       setMicroLots((standardLotsResult * 100).toFixed(0));
 
-      // Convert to units (standard lots × 100,000 for forex)
       const lotMultiplier = (isCryptoPair || isIndices) ? 1 :
         (isCommodities ? 100 : 100000);
       const unitsResult = standardLotsResult * lotMultiplier;
@@ -325,38 +316,28 @@ const Forex = () => {
 
     const handleAccountBalanceChange = (value: React.SetStateAction<string>) => {
         setAccountBalance(value);
-        // When account balance changes, recalculate but don't override user inputs
     };
 
     const handleRiskPercentageChange = (value: React.SetStateAction<string>) => {
-        // if (typeof value === "string") {
-        //     const numericValue = value.replace('%', '');
-        //     // Use numericValue if needed
-        // }
         setRiskPercentage(value);
-        // Clear risk amount when manually editing risk percentage
         setRiskAmount('');
     };
 
     const handleRiskAmountChange = (value: React.SetStateAction<string>) => {
         setRiskAmount(value);
-        // Clear risk percentage when manually editing risk amount
         setRiskPercentage('');
     };
 
     const handleStopLossPriceChange = (value: React.SetStateAction<string>) => {
         setStopLossPrice(value);
-        // Clear stop loss pips when manually editing stop loss price
         setStopLossPips('');
     };
 
     const handleStopLossPipsChange = (value: React.SetStateAction<string>) => {
         setStopLossPips(value);
-        // Clear stop loss price when manually editing stop loss pips
         setStopLossPrice('');
     };
 
-    // Run calculation anytime relevant inputs change
     useEffect(() => {
         calculatePosition();
     }, [

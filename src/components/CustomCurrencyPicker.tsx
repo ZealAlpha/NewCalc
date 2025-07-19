@@ -279,7 +279,8 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         }
     };
 
-    const filteredItems = getFilteredItems()
+
+  const filteredItems = getFilteredItems()
         .sort((a, b) => (favorites.includes(b.value) ? 1 : 0) - (favorites.includes(a.value) ? 1 : 0));
 
     return (

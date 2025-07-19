@@ -70,14 +70,7 @@ export default function App() {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <View className="flex-1 bg-white">
 
-        {/* ✅ Show banner only after interstitial is closed */}
-        {showBanner && (
-          <BannerAd
-            unitId={bannerAdUnitId}
-            size={BannerAdSize.FULL_BANNER}
-            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-          />
-        )}
+
 
         {/* ✅ Navigation screens */}
         <NavigationContainer>
@@ -87,6 +80,14 @@ export default function App() {
             <Stack.Screen name="Premium" component={Premium} />
           </Stack.Navigator>
         </NavigationContainer>
+        {/* ✅ Show banner only after interstitial is closed */}
+        {showBanner && (
+          <BannerAd
+            unitId={bannerAdUnitId}
+            size={BannerAdSize.FULL_BANNER}
+            requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+          />
+        )}
       </View>
     </>
   );
