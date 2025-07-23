@@ -132,7 +132,7 @@ const Forex = () => {
         console.warn('No exchange rate data received for indices');
         setIndicesExchangeRate(1); // Fallback to 1
       }
-      console.log("Fetched indices exchange rate:", data[0].price);
+
     } catch (err) {
       console.error('Error fetching indices exchange rate:', err);
       setIndicesExchangeRate(1); // Fallback to 1
@@ -244,15 +244,14 @@ const Forex = () => {
 
     if (isIndices) {
       const indexQuoteCurrency = indicesQuoteCurrencies[currencyPair];
-      const exchangeRate = IndicesExchangeRate || 1;
-
       if (accountCurrency === indexQuoteCurrency) {
-        pipValue = 0.01;
+        pipValue = 0.01; // Default pip value when currencies match
       } else {
-        pipValue = 0.01 * exchangeRate;
+        // The IndicesExchangeRate is the rate from quote currency to account currency
+        // For AUS200 with USD account, this is AUD/USD = 0.65191
+        const exchangeRate = IndicesExchangeRate || 1;
+        pipValue = 0.01 * exchangeRate; // PV = Pip × Exchange Rate
       }
-
-      console.log(`PipValue for Index ${currencyPair}:`, pipValue, 'Rate:', exchangeRate);
     } else if (isJPYQuote) {
       // Existing JPY quote logic
       if (accountCurrency === quoteCurrency) {
@@ -360,13 +359,10 @@ const Forex = () => {
       setMiniLots((standardLotsResult * 10).toFixed(1));
       setMicroLots((standardLotsResult * 100).toFixed(0));
 
-      if (isIndices) {
-        setUnits(standardLotsResult.toFixed(2)); // ✅ Should match handwritten 31.63
-      } else {
-        const lotMultiplier = isCryptoPair ? 1 : (isCommodities ? 100 : 100000);
-        const unitsResult = standardLotsResult * lotMultiplier;
-        setUnits(Math.round(unitsResult).toString());
-      }
+      const lotMultiplier = (isCryptoPair || isIndices) ? 1 :
+        (isCommodities ? 100 : 100000);
+      const unitsResult = standardLotsResult * lotMultiplier;
+      setUnits(Math.round(unitsResult).toString());
     } else {
       setUnits('0');
       setStandardLots('0');
@@ -410,7 +406,6 @@ const Forex = () => {
         stopLossPrice,
         pipValuePerLot,
         currencyPair,
-        IndicesExchangeRate,
         calculatePosition
     ]);
 
