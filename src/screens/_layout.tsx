@@ -6,12 +6,14 @@ import { RouteProp } from '@react-navigation/native';
 import CustomNavBar from '../navigation/CustomNavBar';
 import Crypto from './crypto';
 import Forex from './forex';
+import Deriv from './deriv';
 import Settings from './settings';
 import Premium from './premium';
 
 type RootTabParamList = {
   Crypto: undefined;
   Forex: undefined;
+  Deriv: undefined;
   Settings: undefined;
   Premium: undefined;
 };
@@ -23,7 +25,7 @@ type Props = {
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
-export default function _layout({ route }: Props) {
+export default function Layout({ route }: Props) {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const initialTab = route?.params?.screen ?? 'Crypto'; // default to 'Crypto' if none passed
 
@@ -53,6 +55,7 @@ export default function _layout({ route }: Props) {
       >
         <Tab.Screen name="Crypto" component={Crypto} />
         <Tab.Screen name="Forex" component={Forex} />
+        <Tab.Screen name="Deriv" component={Deriv} />
         <Tab.Screen name="Settings" component={Settings} />
         <Tab.Screen name="Premium" component={Premium} />
       </Tab.Navigator>

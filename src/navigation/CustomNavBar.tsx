@@ -1,10 +1,10 @@
-import {View, Platform, StyleSheet, TouchableOpacity, Keyboard} from 'react-native';
-import { useLinkBuilder, useTheme } from '@react-navigation/native';
-import { Text, PlatformPressable } from '@react-navigation/elements';
-import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import { Text } from '@react-navigation/elements';
+import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Animated, {FadeIn, FadeOut, LinearTransition} from 'react-native-reanimated';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { Image } from 'react-native';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -15,10 +15,7 @@ const OPTIONAL_COLOR = '#0B6623';
 // @ts-ignore
 const CustomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation, keyboardVisible }) => {
     if (keyboardVisible) return null;
-    const { colors } = useTheme();
-    const { buildHref } = useLinkBuilder();
-
-    return (
+  return (
         <View style={styles.container}>
             {state.routes.map((route, index) => {
 
@@ -67,12 +64,23 @@ const CustomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
             case 'Crypto':
                 return <FontAwesome6 name="bitcoin" size={18} color={color} />;
                 case 'Forex':
-                    // return <FontAwesome6 name="chart-line" size={18} color={color} />;
-                    return <Text style={styles.fxText}>FX</Text>
-                    case 'Settings':
-                        return <Feather name="settings" size={18} color={color} />;
-                        case 'Premium':
-                            return <FontAwesome6 name="crown" size={18} color={color} />;
+                  return <Text style={styles.fxText}>FX</Text>
+                  case 'Deriv':
+                      return (
+                        <Image
+                          source={require('../../assets/images/deriv_icon.png')}
+                          style={{
+                            width: 15,
+                            height: 18,
+                            objectFit: 'contain',
+                            tintColor: color // This applies the color
+                          }}
+                        />
+                      );
+          case 'Settings':
+                          return <Feather name="settings" size={18} color={color} />;
+                          case 'Premium':
+                              return <FontAwesome6 name="crown" size={18} color={color} />;
         }
     }
 }
@@ -84,7 +92,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: PRIMARY_COLOR,
-        width: '85%',
+        width: '95%',
         alignSelf: 'center',
         bottom: 30,
         borderRadius: 40,

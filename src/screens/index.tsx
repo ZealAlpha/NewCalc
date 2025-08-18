@@ -4,6 +4,7 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import images from "../constants/images";
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { useNavigation } from '@react-navigation/native';
+import Feather from 'react-native-vector-icons/Feather';
 
 const Index = () => {
   const navigation = useNavigation();
@@ -33,13 +34,25 @@ const Index = () => {
                 <Pressable
                   // Help me Push this one to the Crypto page
                   onPress={() => navigation.navigate('Layout', { screen: 'Crypto' })}
-                    className="bg-secondary-100 px-6 py-4 rounded-2xl w-3/4 items-center"
+                    className="bg-secondary-100 px-6 py-4 rounded-2xl w-3/4 items-center mb-4"
                 >
                     <View className="flex-row items-center">
                         <FontAwesome6 name="bitcoin" iconStyle="brand" size={22} color="#ffffff" />
                         <Text className="ml-2 text-white text-lg font-rubik-bold">Crypto P.S Calculator</Text>
                     </View>
                 </Pressable>
+
+              {/* Crypto Button */}
+              <Pressable
+                // Help me Push this one to the Crypto page
+                onPress={() => navigation.navigate('Layout', { screen: 'Deriv' })}
+                className="bg-red-600 px-6 py-4 rounded-2xl w-3/4 items-center"
+              >
+                <View className="flex-row items-center">
+                    <FontAwesome6 name="chart-line" iconStyle="solid" size={22} color="#ffffff" />
+                    <Text className="ml-2 text-white text-lg font-rubik-bold">Deriv S.I Calculator</Text>
+                </View>
+              </Pressable>
             </View>
         </SafeAreaView>
     )

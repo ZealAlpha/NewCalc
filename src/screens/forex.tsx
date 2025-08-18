@@ -31,28 +31,28 @@ const Forex = () => {
     const getCurrencySymbol = (currencyCode: string) => {
         switch (currencyCode) {
             case 'USD': return '$';
-            case 'EUR': return '€';
-            case 'GBP': return '£';
-            case 'JPY': return '¥';
-            case 'CHF': return 'CHF ';
-            case 'CAD': return 'CA$';
-            case 'AUD': return 'AU$';
-            case 'NZD': return 'NZ$';
-            case 'CNY': case 'CNH': return '¥';
-            case 'CZK': return 'Kč';
-            case 'DKK': return 'kr ';
-            case 'HKD': return 'HK$';
-            case 'KRW': return '₩';
-            case 'KWD': return 'KD ';
-            case 'INR': return '₹';
-            case 'MXN': return 'Mex$';
-            case 'NOK': return 'kr ';
-            case 'PLN': return 'zł ';
-            case 'RUB': return '₽';
-            case 'SEK': return 'kr ';
-            case 'SGD': return 'S$';
-            case 'TRY': return '₺';
-            case 'ZAR': return 'R ';
+            // case 'EUR': return '€';
+            // case 'GBP': return '£';
+            // case 'JPY': return '¥';
+            // case 'CHF': return 'CHF ';
+            // case 'CAD': return 'CA$';
+            // case 'AUD': return 'AU$';
+            // case 'NZD': return 'NZ$';
+            // case 'CNY': case 'CNH': return '¥';
+            // case 'CZK': return 'Kč';
+            // case 'DKK': return 'kr ';
+            // case 'HKD': return 'HK$';
+            // case 'KRW': return '₩';
+            // case 'KWD': return 'KD ';
+            // case 'INR': return '₹';
+            // case 'MXN': return 'Mex$';
+            // case 'NOK': return 'kr ';
+            // case 'PLN': return 'zł ';
+            // case 'RUB': return '₽';
+            // case 'SEK': return 'kr ';
+            // case 'SGD': return 'S$';
+            // case 'TRY': return '₺';
+            // case 'ZAR': return 'R ';
             default: return '';
         }
     };
@@ -231,8 +231,11 @@ const Forex = () => {
 
     const quoteCurrency = indicesQuoteCurrencies[currencyPair] || currencyPair.substring(3, 6);
     const baseCurrency = currencyPair.substring(0, 3);
+    const commoditiesBaseCurrency = currencyPair.substring(0, 2);
     const isJPYQuote = quoteCurrency === 'JPY';
+    const isXAG = commoditiesBaseCurrency === 'SI';
     const isJPYBase = baseCurrency === 'JPY';
+    const isNG = currencyPair.startsWith('NGUSD');
 
     const isIndices = indicesPairs.includes(currencyPair);
     const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG'].some(sym => currencyPair.startsWith(sym));
@@ -242,7 +245,16 @@ const Forex = () => {
 
     let pipValue;
 
-    if (isIndices) {
+      if (isCryptoPair) {
+          // For crypto pairs, pip value is typically 1.00 per unit
+          if (accountCurrency === quoteCurrency) {
+              pipValue = 0.01;
+          } else if (accountCurrency === 'USD') {
+              pipValue = 0.01;
+          } else {
+              pipValue = 0.01 * parseFloat(quoteToAccountRate);
+          }
+      } else if (isIndices) {
       const indexQuoteCurrency = indicesQuoteCurrencies[currencyPair];
       if (accountCurrency === indexQuoteCurrency) {
         pipValue = 0.01; // Default pip value when currencies match
@@ -274,15 +286,33 @@ const Forex = () => {
       } else {
         pipValue = 10 * parseFloat(quoteToAccountRate);
       }
-    } else if (isCommodities) {
-      // Existing commodities logic
+    } else if (isCommodities && isXAG) {
+      // Silver logic
       if (accountCurrency === quoteCurrency) {
-        pipValue = 1;
+        pipValue = 50;
       } else if (accountCurrency === 'USD') {
-        pipValue = 1;
+        pipValue = 50;
       } else {
-        pipValue = parseFloat(quoteToAccountRate);
+        pipValue = 50 * parseFloat(quoteToAccountRate);
       }
+    } else if (isCommodities && isNG) {
+        // Natural Gas specific logic - pip value is $10 per lot
+        if (accountCurrency === quoteCurrency) {
+            pipValue = 1;
+        } else if (accountCurrency === 'USD') {
+            pipValue = 1;
+        } else {
+            pipValue = parseFloat(quoteToAccountRate);
+        }
+    }else if (isCommodities) {
+        // Existing commodities logic
+        if (accountCurrency === quoteCurrency) {
+            pipValue = 1;
+        } else if (accountCurrency === 'USD') {
+            pipValue = 1;
+        } else {
+            pipValue = parseFloat(quoteToAccountRate);
+        }
     } else {
       // Existing forex logic
       if (accountCurrency === quoteCurrency) {
@@ -309,9 +339,12 @@ const Forex = () => {
     const pv = parseFloat(pipValuePerLot) || 0;
     const ep = parseFloat(entryPrice) || 0;
     const slPrice = parseFloat(stopLossPrice) || 0;
-
+    const commoditiesBaseCurrency = currencyPair.substring(0, 2);
     const quoteCurrency = currencyPair.substring(3, 6);
     const isJPYQuote = quoteCurrency === 'JPY';
+    const isXAG = commoditiesBaseCurrency === 'SI';
+    const isNG = commoditiesBaseCurrency === 'NG';
+    const isDoge = currencyPair.startsWith('DOG');
 
     const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
       .some(sym => currencyPair.startsWith(sym));
@@ -329,46 +362,73 @@ const Forex = () => {
       setRiskPercentage(calculatedRiskPct.toFixed(2) + '%');
     }
 
-    let calculatedSlPips = slPips;
-    if (ep > 0 && slPrice > 0 && !stopLossPips) {
-      if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
-        // Document shows: SLP = (E-SL) × 100
-        calculatedSlPips = Math.abs(ep - slPrice) * 100;
-      } else {
-        // Document shows: SLP = (E-SL) × 10,000
-        calculatedSlPips = Math.abs(ep - slPrice) * 10000;
+      let calculatedSlPips = slPips;
+      if (ep > 0 && slPrice > 0 && !stopLossPips) {
+          if (isCryptoPair && isDoge) {
+              calculatedSlPips = Math.abs(ep - slPrice) * 1000;
+          } else if (isCryptoPair && !isDoge) {
+              // For crypto, use simple price difference (no multiplier)
+              calculatedSlPips = Math.abs(ep - slPrice) * 100;
+          } else if (isJPYQuote || (isCommodities && !isNG) || isIndices) {
+              // Document shows: SLP = (E-SL) × 100
+              calculatedSlPips = Math.abs(ep - slPrice) * 100;
+          } else if (isCommodities && isNG) {
+              // Natural Gas uses 10,000 multiplier like forex pairs
+              calculatedSlPips = Math.abs(ep - slPrice) * 10000;
+          } else {
+              // Document shows: SLP = (E-SL) × 10,000
+              calculatedSlPips = Math.abs(ep - slPrice) * 10000;
+          }
+          setStopLossPips(calculatedSlPips.toFixed(2));
+      } else if (slPips > 0 && ep > 0 && !stopLossPrice) {
+          let calculatedSlPrice;
+          const direction = -1;
+
+          if (isCryptoPair) {
+              // For crypto, direct price calculation
+              calculatedSlPrice = ep + (direction * calculatedSlPips);
+          } else if (isJPYQuote || (isCommodities && !isNG) || isIndices) {
+              calculatedSlPrice = ep + (direction * calculatedSlPips / 100);
+          } else if (isCommodities && isNG) {
+              // Natural Gas uses 10,000 divisor like forex pairs
+              calculatedSlPrice = ep + (direction * calculatedSlPips / 10000);
+          } else {
+              calculatedSlPrice = ep + (direction * calculatedSlPips / 10000);
+          }
+
+          setStopLossPrice(calculatedSlPrice.toFixed(isCryptoPair ? 1 : (isJPYQuote ? 3 : 5)));
       }
-      setStopLossPips(calculatedSlPips.toFixed(2));
-    } else if (slPips > 0 && ep > 0 && !stopLossPrice) {
-      let calculatedSlPrice;
-      const direction = -1;
 
-      if (isJPYQuote || isCommodities || isIndices || isCryptoPair) {
-        calculatedSlPrice = ep + (direction * calculatedSlPips / 100);
+      if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
+          let baseLotsResult = calculatedRiskAmount / (calculatedSlPips * pv);
+
+          // Special handling for DOGE - multiply by 10 for standard lots
+          if (isDoge) {
+              const standardLotsResult = baseLotsResult * 10;
+              setStandardLots(standardLotsResult.toFixed(2));
+              setMiniLots((standardLotsResult * 10).toFixed(1));
+              setMicroLots((standardLotsResult * 100).toFixed(0));
+              setUnits(Math.round(baseLotsResult).toString());
+          } else {
+              setStandardLots(baseLotsResult.toFixed(2));
+              setMiniLots((baseLotsResult * 10).toFixed(1));
+              setMicroLots((baseLotsResult * 100).toFixed(0));
+
+              // Updated lot multiplier logic
+              const lotMultiplier = (isCryptoPair || isIndices) ? 1 :
+                  (isCommodities && isXAG) ? 1000 :
+                      (isCommodities && isNG) ? 10000 :
+                          (isCommodities) ? 100 : 100000;
+
+              const unitsResult = baseLotsResult * lotMultiplier;
+              setUnits(Math.round(unitsResult).toString());
+          }
       } else {
-        calculatedSlPrice = ep + (direction * calculatedSlPips / 10000);
+          setUnits('0');
+          setStandardLots('0');
+          setMiniLots('0');
+          setMicroLots('0');
       }
-
-      setStopLossPrice(calculatedSlPrice.toFixed(isJPYQuote ? 3 : 5));
-    }
-
-    if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
-      const standardLotsResult = calculatedRiskAmount / (calculatedSlPips * pv);
-
-      setStandardLots(standardLotsResult.toFixed(2));
-      setMiniLots((standardLotsResult * 10).toFixed(1));
-      setMicroLots((standardLotsResult * 100).toFixed(0));
-
-      const lotMultiplier = (isCryptoPair || isIndices) ? 1 :
-        (isCommodities ? 100 : 100000);
-      const unitsResult = standardLotsResult * lotMultiplier;
-      setUnits(Math.round(unitsResult).toString());
-    } else {
-      setUnits('0');
-      setStandardLots('0');
-      setMiniLots('0');
-      setMicroLots('0');
-    }
   }, [accountBalance, riskPercentage, riskAmount, stopLossPips, entryPrice, stopLossPrice, pipValuePerLot, currencyPair]);
 
     const handleAccountBalanceChange = (value: React.SetStateAction<string>) => {
@@ -393,6 +453,12 @@ const Forex = () => {
     const handleStopLossPipsChange = (value: React.SetStateAction<string>) => {
         setStopLossPips(value);
         setStopLossPrice('');
+    };
+
+    const handleEntryPriceChange = (value: string) => {
+        setEntryPrice(value);
+        setIsEntryPriceManuallyEdited(true);
+        if (stopLossPrice) setStopLossPips(''); // triggers SL Pips auto-update
     };
 
     useEffect(() => {
@@ -523,10 +589,7 @@ const Forex = () => {
                           <View className="relative">
                             <TextInput
                               value={entryPrice}
-                              onChangeText={(text) => {
-                                setEntryPrice(text);
-                                setIsEntryPriceManuallyEdited(true);
-                              }}
+                              onChangeText={handleEntryPriceChange}
                               keyboardType="decimal-pad"
                               placeholder="Auto-filled entry price"
                               className="p-4 pr-10 border border-primary-100 rounded-md text-black dark:text-white"

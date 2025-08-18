@@ -20,7 +20,7 @@ const Settings = () => {
         try {
             await Share.share({
                 message: 'Check out this amazing Position Size Calculator App!',
-                url: 'https://afibie.com',
+                url: 'https://fxcryptocalculator.com/',
             });
         } catch (error) {
             console.error('Share error:', error);

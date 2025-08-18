@@ -3,60 +3,82 @@ import { TextInput } from 'react-native';
 
 // Enhanced TextInput component with long-press backspace
 const EnhancedTextInput = ({ value, onChangeText, ...props }: any) => {
-    // @ts-ignore
   const longPressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const previousValueRef = useRef<string>(value);
+  const previousValueRef = useRef<string>(value);
+  const backspaceCountRef = useRef<number>(0); // Track consecutive backspaces
+  const lastBackspaceTimeRef = useRef<number>(0); // Track time of last backspace
 
-    const handleTextChange = (text: string | any[]) => {
-        const previousValue = previousValueRef.current;
-        if (typeof text === "string") {
-            previousValueRef.current = text;
+  const handleTextChange = (text: string) => {
+    const currentTime = Date.now();
+    const previousValue = previousValueRef.current;
+
+    // Update the previous value
+    previousValueRef.current = text;
+
+    // Check if user is backspacing
+    if (text.length < previousValue.length && previousValue.length > 0) {
+      const timeSinceLastBackspace = currentTime - lastBackspaceTimeRef.current;
+
+      // If backspace is within 300ms, consider it a long press sequence
+      if (timeSinceLastBackspace < 300) {
+        backspaceCountRef.current += 1;
+
+        // If 3 or more consecutive backspaces within 300ms, trigger clear
+        if (backspaceCountRef.current >= 3) {
+          if (longPressTimeoutRef.current) {
+            clearTimeout(longPressTimeoutRef.current);
+          }
+          onChangeText(''); // Clear the entire input
+          backspaceCountRef.current = 0; // Reset counter
+          lastBackspaceTimeRef.current = 0; // Reset time
+          return;
         }
+      } else {
+        // Reset if too much time has passed
+        backspaceCountRef.current = 1;
+      }
 
-        // Check if user is backspacing (text is shorter than before)
-        if (text.length < previousValue.length && previousValue.length > 0) {
-            // Clear any existing timeout
-            if (longPressTimeoutRef.current) {
-                clearTimeout(longPressTimeoutRef.current);
-            }
+      // Set the last backspace time
+      lastBackspaceTimeRef.current = currentTime;
 
-            // Set timeout for long press clear (800ms)
-            longPressTimeoutRef.current = setTimeout(() => {
-                onChangeText(''); // Clear the entire input
-                longPressTimeoutRef.current = null;
-            }, 800);
-        } else {
-            // User is typing, clear any timeout
-            if (longPressTimeoutRef.current) {
-                clearTimeout(longPressTimeoutRef.current);
-                longPressTimeoutRef.current = null;
-            }
-        }
+      // Clear any existing timeout if not part of a long press
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    } else {
+      // Reset on typing
+      backspaceCountRef.current = 0;
+      lastBackspaceTimeRef.current = 0;
+      if (longPressTimeoutRef.current) {
+        clearTimeout(longPressTimeoutRef.current);
+      }
+    }
 
-        onChangeText(text);
+    onChangeText(text);
+  };
+
+  // Update ref when value changes from parent
+  useEffect(() => {
+    previousValueRef.current = value;
+  }, [value]);
+
+  // Clean up timeout on component unmount
+  useEffect(() => {
+    return () => {
+      if (longPressTimeoutRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        clearTimeout(longPressTimeoutRef.current);
+      }
     };
+  }, []);
 
-    // Update ref when value changes from parent
-    useEffect(() => {
-        previousValueRef.current = value;
-    }, [value]);
-
-    // Clean up timeout on component unmount
-    useEffect(() => {
-        return () => {
-            if (longPressTimeoutRef.current) {
-                clearTimeout(longPressTimeoutRef.current);
-            }
-        };
-    }, []);
-
-    return (
-        <TextInput
-            value={value}
-            onChangeText={handleTextChange}
-            {...props}
-        />
-    );
+  return (
+    <TextInput
+      value={value}
+      onChangeText={handleTextChange}
+      {...props}
+    />
+  );
 };
 
 export default EnhancedTextInput;

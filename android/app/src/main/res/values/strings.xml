@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">FX Crypto Calculator</string>
+
+    <string moduleConfig="true" name="CodePushDeploymentKey">iPkil8fgRQRmxgsHY9i5P_-hQc8ClT0feCN</string>
+    <string moduleConfig="true" name="CodePushServerUrl">https://codepush.appsonair.com</string>
+
 </resources>

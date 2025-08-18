@@ -172,65 +172,65 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         },
     ];
 
-    const indicesPairs: CurrencyItem[] = [
-        {
-            label: 'US30',
-            value: '^DJI',
-            description: "Dow Jones Industrial Average"
-        },
-        {
-            label: 'SP500',
-            value: '^SPX',
-            description: "S&P 500 Index"
-        },
-        {
-            label: 'AUS200',
-            value: '^AXJO',
-            description: "S&P/ASX 200 Index"
-        },
-        {
-            label: 'JP225',
-            value: '^N225',
-            description: "Neikkei 225 Index"
-        },
-        {
-            label: 'UK100',
-            value: '^FTSE',
-            description: "FTSE 100 Index"
-        },
-        {
-            label: 'IBEX35',
-            value: '^IBEX',
-            description: " IBEX 35 Index"
-        },
-        {
-            label: 'HSI50',
-            value: '^HSI',
-            description: "Hang Seng Index"
-        },
-        {
-            label: 'NAS100',
-            value: '^XNDX',
-            description: "NASDAQ 100 Index"
-        },
-        {
-            label: 'GDAXI',
-            value: '^GDAXI',
-            description: "Dax 30 Index"
-        },
-        {
-            label: 'FCHI40',
-            value: '^FCHI',
-            description: "CAC 40 Index"
-        },
-    ];
+    // const indicesPairs: CurrencyItem[] = [
+    //     {
+    //         label: 'US30',
+    //         value: '^DJI',
+    //         description: "Dow Jones Industrial Average"
+    //     },
+    //     {
+    //         label: 'SP500',
+    //         value: '^SPX',
+    //         description: "S&P 500 Index"
+    //     },
+    //     {
+    //         label: 'AUS200',
+    //         value: '^AXJO',
+    //         description: "S&P/ASX 200 Index"
+    //     },
+    //     {
+    //         label: 'JP225',
+    //         value: '^N225',
+    //         description: "Neikkei 225 Index"
+    //     },
+    //     {
+    //         label: 'UK100',
+    //         value: '^FTSE',
+    //         description: "FTSE 100 Index"
+    //     },
+    //     {
+    //         label: 'IBEX35',
+    //         value: '^IBEX',
+    //         description: " IBEX 35 Index"
+    //     },
+    //     {
+    //         label: 'HSI50',
+    //         value: '^HSI',
+    //         description: "Hang Seng Index"
+    //     },
+    //     {
+    //         label: 'NAS100',
+    //         value: '^XNDX',
+    //         description: "NASDAQ 100 Index"
+    //     },
+    //     {
+    //         label: 'GDAXI',
+    //         value: '^GDAXI',
+    //         description: "Dax 30 Index"
+    //     },
+    //     {
+    //         label: 'FCHI40',
+    //         value: '^FCHI',
+    //         description: "CAC 40 Index"
+    //     },
+    // ];
 
     // Combined data with category tags
     const allData = {
         'Forex': forexPairs,
         'Crypto': cryptoPairs,
         'Commodities': commoditiesPairs,
-        'Indices': indicesPairs
+        // 'Indices': indicesPairs
     };
 
     // Helper function to get display label for selected currency pair
@@ -253,9 +253,9 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                 return cryptoPairs;
             case 'Commodities':
                 return commoditiesPairs;
-            case 'Indices':
-                return indicesPairs;
-            default:
+            // case 'Indices':
+            //     return indicesPairs;
+             default:
                 return [];
         }
     };
@@ -303,7 +303,11 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                             {/* Tabs */}
                             <View className="flex-row justify-around mb-4">
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
-                                    {['Forex', 'Crypto', 'Commodities', 'Indices'].map(tab => (
+                                    {['Forex',
+                                      'Crypto',
+                                      'Commodities',
+                                      // 'Indices'
+                                    ].map(tab => (
                                         <TouchableOpacity
                                             key={tab}
                                             onPress={() => setActiveTab(tab as any)}
