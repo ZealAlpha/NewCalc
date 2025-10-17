@@ -46,7 +46,7 @@ const Settings = () => {
                     <Text className="ml-4 font-rubik-bold dark:text-white text-black-300">System</Text>
                 </View>
 
-                <View className="w-full mb-1 px-2">
+                <View className="w-full mt-6 px-2">
                   <View className="dark:bg-black-200 bg-gray-50 border border-primary-100 rounded-lg p-4">
                     <View className="flex-row items-center justify-between">
                       <View className="flex-1 mr-4">
