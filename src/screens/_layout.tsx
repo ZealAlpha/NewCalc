@@ -8,14 +8,14 @@ import Crypto from './crypto';
 import Forex from './forex';
 import Deriv from './deriv';
 import Settings from './settings';
-import Premium from './premium';
+// import Premium from './premium';
 
 type RootTabParamList = {
   Crypto: undefined;
   Forex: undefined;
   Deriv: undefined;
   Settings: undefined;
-  Premium: undefined;
+  // Premium: undefined;
 };
 
 // Accept route prop to receive screen info from parent stack
@@ -57,7 +57,7 @@ export default function Layout({ route }: Props) {
         <Tab.Screen name="Forex" component={Forex} />
         <Tab.Screen name="Deriv" component={Deriv} />
         <Tab.Screen name="Settings" component={Settings} />
-        <Tab.Screen name="Premium" component={Premium} />
+        {/*<Tab.Screen name="Premium" component={Premium} />*/}
       </Tab.Navigator>
     </>
   );

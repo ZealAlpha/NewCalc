@@ -4,7 +4,6 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import images from "../constants/images";
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
 import { useNavigation } from '@react-navigation/native';
-import Feather from 'react-native-vector-icons/Feather';
 
 const Index = () => {
   const navigation = useNavigation();
@@ -42,7 +41,7 @@ const Index = () => {
                     </View>
                 </Pressable>
 
-              {/* Crypto Button */}
+              {/* Deriv Button */}
               <Pressable
                 // Help me Push this one to the Crypto page
                 onPress={() => navigation.navigate('Layout', { screen: 'Deriv' })}
