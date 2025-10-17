@@ -5,6 +5,9 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import DerivPicker from '../components/DerivPicker.tsx';
 import CurrencyPickerModal from "../components/CurrencyPickerModal.tsx";
 import EnhancedTextInput from "../components/EnhancedTextInput.tsx";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ToastAndroid, Alert, Platform } from 'react-native';
+import { useSettings } from '../context/SettingsContext.tsx';
 
 // Comprehensive instruments data with tick size (TS), tick value (TV), and minimum lot
 const INSTRUMENTS = {
@@ -118,6 +121,9 @@ const Deriv = () => {
   const [loading, setLoading] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
   const [isCalculated, setIsCalculated] = useState(false);
+  const [takeProfit, setTakeProfit] = useState('');
+  const [result, setResult] = useState({ ep: '0', rrr: '0' });
+
 
 
   // Helper function to get instrument data
@@ -146,14 +152,34 @@ const Deriv = () => {
     return Math.round(value * factor) / factor;
   };
 
+  const { showRiskRewardSection } = useSettings();
+
   // Helper function to get currency symbol
   const getCurrencySymbol = (currencyCode: string) => {
     switch (currencyCode) {
       case 'USD': return '$';
-      // case 'EUR': return '€';
-      // case 'GBP': return '£';
-      // case 'AUD': return '$';
-      // case 'JPY': return '¥';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'JPY': return '¥';
+      case 'CHF': return 'CHF ';
+      case 'CAD': return 'CA$';
+      case 'AUD': return 'AU$';
+      case 'NZD': return 'NZ$';
+      // case 'CNY': case 'CNH': return '¥';
+      // case 'CZK': return 'Kč';
+      // case 'DKK': return 'kr ';
+      // case 'HKD': return 'HK$';
+      // case 'KRW': return '₩';
+      // case 'KWD': return 'KD ';
+      // case 'INR': return '₹';
+      // case 'MXN': return 'Mex$';
+      // case 'NOK': return 'kr ';
+      // case 'PLN': return 'zł ';
+      // case 'RUB': return '₽';
+      // case 'SEK': return 'kr ';
+      // case 'SGD': return 'S$';
+      // case 'TRY': return '₺';
+      case 'ZAR': return 'R ';
       default: return '';
     }
   };
@@ -225,7 +251,7 @@ const Deriv = () => {
     };
 
     ws.current.onerror = (error) => {
-      // console.error('Deriv WebSocket error for', pair, ':', error);
+      console.error('Deriv WebSocket error for', pair, ':', error);
       setLoading(false);
       closeWebSocket();
     };
@@ -389,6 +415,96 @@ const Deriv = () => {
     }
   };
 
+  // 💾 Persist Account Balance and Risk Percentage
+  useEffect(() => {
+    const saveUserInputs = async () => {
+      try {
+        if (accountBalance) {
+          await AsyncStorage.setItem('accountBalance', accountBalance);
+        }
+        if (riskPercentage) {
+          await AsyncStorage.setItem('riskPercentage', riskPercentage);
+        }
+      } catch (error) {
+        console.warn('Error saving data to storage:', error);
+      }
+    };
+    saveUserInputs();
+  }, [accountBalance, riskPercentage]);
+
+
+  // Calculate Take Profit
+  // let rrr = '0';
+  // let expectedProfit = '0';
+
+  // ♻️ Load saved Account Balance and Risk Percentage on startup
+  useEffect(() => {
+    const loadUserInputs = async () => {
+      try {
+        const savedBalance = await AsyncStorage.getItem('accountBalance');
+        const savedRisk = await AsyncStorage.getItem('riskPercentage');
+
+        if (savedBalance !== null) {
+          setAccountBalance(savedBalance);
+        }
+        if (savedRisk !== null) {
+          setRiskPercentage(savedRisk);
+        }
+      } catch (error) {
+        console.warn('Error loading data from storage:', error);
+      }
+    };
+    loadUserInputs();
+  }, []);
+
+
+  const areBasicFieldsFilled = () => {
+    return (
+      accountBalance &&
+      (riskPercentage || riskAmount) &&
+      stopLossPrice &&
+      entryPrice &&
+      parseFloat(entryPrice) > 0 &&
+      parseFloat(stopLossPrice) > 0
+    );
+  };
+
+  const calculateTakeProfit = (tpValue: string) => {
+    const TP = parseFloat(tpValue);
+    const E = parseFloat(entryPrice);
+    const SL = parseFloat(stopLossPrice);
+    const C = parseFloat(accountBalance.replace(/,/g, ''));
+    const R = parseFloat(riskPercentage.replace('%', '')) / 100;
+
+    if (!C || !R || !E || !SL || !TP) {
+      setResult({ ep: '0', rrr: '0' });
+      return;
+    }
+
+    // Ensure Entry Price is between SL and TP
+    const isValid =
+      (E > SL && E < TP) || (E < SL && E > TP);
+
+    if (!isValid) {
+      setResult({ ep: 'Error', rrr: 'Error' });
+      return;
+    }
+
+    const riskAmount = C * R;
+    const rawRRR = (TP - E) / (E - SL);
+    const formattedRRR = rawRRR.toFixed(2);
+
+    if (rawRRR <= 0 || !isFinite(rawRRR)) {
+      setResult({ ep: 'Error', rrr: 'Error' });
+      return;
+    }
+
+    const EP = (rawRRR * riskAmount).toFixed(2);
+
+    setResult({ ep: EP, rrr: formattedRRR });
+  };
+
+
   const handleStopLossPipsChange = (value: React.SetStateAction<string>) => {
     setStopLossTick(value);
     setStopLossPrice('');
@@ -400,6 +516,16 @@ const Deriv = () => {
     if (stopLossPrice) setStopLossTick('');
     resetOutputs();
   };
+
+  // 🔁 Auto-clear EP/RRR when Entry or Stop Loss changes
+  useEffect(() => {
+    // Only clear if there’s a current result showing
+    if (result.ep !== '0' || result.rrr !== '0') {
+      setResult({ ep: '0', rrr: '0' });
+      setTakeProfit('');
+    }
+  }, [entryPrice, stopLossPrice]);
+
 
   // useEffect(() => {
   //   calculatePosition();
@@ -414,18 +540,68 @@ const Deriv = () => {
   //   calculatePosition
   // ]);
 
-  const handleReset = useCallback(() => {
-    setAccountBalance('');
-    setRiskPercentage('');
-    setRiskAmount('');
-    setStopLossTick('');
-    setStopLossPrice('');
-    setEntryPrice('');
-    setPipValuePerLot('0');
-    setStandardLots('0');
-    // setCurrencyPair('R_10');
-    setAccountCurrency('USD');
-  }, []);
+  const lastPress = useRef(0);
+  const singlePressTimer = useRef(null);
+
+  const handleReset = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+
+    // ✅ Detect Double-Tap
+    if (now - lastPress.current < DOUBLE_PRESS_DELAY) {
+      // 🔹 Double-tap detected → clear timeout first
+      if (singlePressTimer.current) {
+        clearTimeout(singlePressTimer.current);
+        singlePressTimer.current = null;
+      }
+
+      // 🔹 Clear AsyncStorage and reset everything
+      (async () => {
+        try {
+          await AsyncStorage.multiRemove(['accountBalance', 'riskPercentage']);
+          setAccountBalance('');
+          setRiskPercentage('');
+          setEntryPrice('');
+          setStopLossPrice('');
+          setEntryPrice('');
+          setPipValuePerLot('0');
+          setStandardLots('0');
+          setTakeProfit('');
+          setResult({ ep: '0', rrr: '0' });
+
+          if (Platform.OS === 'android') {
+            ToastAndroid.show('All saved data has been removed.', ToastAndroid.SHORT);
+          } else {
+            Alert.alert('Data Cleared', 'All saved data has been removed.');
+          }
+        } catch (error) {
+          console.warn('Error clearing AsyncStorage:', error);
+        }
+      })();
+
+      lastPress.current = 0; // reset timer
+    } else {
+      // 🟡 Single tap → wait to check if another tap comes
+      singlePressTimer.current = setTimeout(() => {
+        // Only clear form values (keep AsyncStorage)
+        setEntryPrice('');
+        setStopLossPrice('');
+        setEntryPrice('');
+        setPipValuePerLot('0');
+        setStandardLots('0');
+        setTakeProfit('');
+        setResult({ ep: '0', rrr: '0' });
+
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Fields cleared (saved data preserved).', ToastAndroid.SHORT);
+        } else {
+          Alert.alert('Form Reset', 'Fields cleared (saved data preserved).');
+        }
+      }, DOUBLE_PRESS_DELAY);
+
+      lastPress.current = now;
+    }
+  };
 
   // Clean up the WebSocket connection when the component unmounts
   useEffect(() => {
@@ -571,7 +747,7 @@ const Deriv = () => {
           </View>
         </View>
 
-        <View className="mt-4 w-full bg-red-600 border border-white rounded-2xl">
+        <View className="mt-4 mb-1 w-full bg-red-600 border border-white rounded-2xl">
           {[
             // { label: 'Risk Amount', value: riskAmount ? `${getCurrencySymbol(accountCurrency)}${riskAmount}` : `${getCurrencySymbol(accountCurrency)}0` },
             { label: 'Lots', value: isCalculated ? standardLots : '0' },
@@ -589,30 +765,82 @@ const Deriv = () => {
           ))}
         </View>
 
-        <View className="flex-row gap-4 mt-6">
-          <View className="flex-1">
-            <Text className="text-sm font-rubik-bold text-gray-700 dark:text-white mb-1">Take Profit Price</Text>
-            <TextInput
-              className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
-              placeholder="Take Profit Price"
-              placeholderTextColor="#374151"
-              // value={formData.entryPrice}
-              // onChangeText={(value) => {
-              //   const updated = { ...formData, entryPrice: value };
-              //   setFormData(updated);
-              //   calculatePosition(updated);
-              // }}
-              keyboardType="numeric"
-            />
-          </View>
+        {showRiskRewardSection && (
+        <View className="mt-4 w-full bg-black-200 border border-white rounded-2xl overflow-hidden mb-2">
+          {/* Table Grid */}
+          <View className="border-t border-white flex-row">
 
-          <View className="flex-1 mt-2 ml-5">
-            <Text className="text-lg text-green-900 font-rubik-bold dark:text-green-500 mb-1">EP: 000</Text>
-            <Text className="text-lg text-red-800 font-rubik-bold dark:text-red-700 mb-1">Risk: {riskAmount}</Text>
-            <Text className="text-lg text-purple-900 font-rubik-bold dark:text-purple-500 mb-1">RRR: </Text>
+            {/* LEFT COLUMN - Take Profit Input */}
+            <View className="w-1/2 border-r border-white px-4 py-5 justify-center">
+              <TextInput
+                className="p-4 border border-accent-100 rounded-xl text-white text-center"
+                placeholder="Take Profit Price"
+                placeholderTextColor="#808080"
+                value={takeProfit}
+                onChangeText={(value) => {
+                  setTakeProfit(value);
+                  calculateTakeProfit(value);
+                }}
+                keyboardType="numeric"
+              />
+            </View>
+
+
+            {/* RIGHT COLUMN - EP, Risk, RRR */}
+            <View className="w-1/2 px-4 py-5 justify-center items-center">
+              {areBasicFieldsFilled() && takeProfit ? (
+                <View className="w-full">
+                  {/* Expected Profit */}
+                  <View className="flex-row justify-between border-b border-white/30 pb-2 mb-2">
+                    <Text className="text-white font-rubik-medium">Profit:</Text>
+                    <Text
+                      className={`font-rubik-bold ${
+                        result.ep === 'Error' ? 'text-red-500' : 'text-green-400'
+                      }`}
+                    >
+                      {result.ep === 'Error'
+                        ? 'Error'
+                        : `≈${getCurrencySymbol(accountCurrency)}${result.ep}`}
+                    </Text>
+                  </View>
+
+                  {/* Risk */}
+                  <View className="flex-row justify-between border-b border-white/30 pb-2 mb-2">
+                    <Text className="text-white font-rubik-medium">Risk:</Text>
+                    <Text className="text-red-400 font-rubik-bold">
+                      {getCurrencySymbol(accountCurrency)}{riskAmount || '0'}
+                    </Text>
+                  </View>
+
+                  {/* RRR */}
+                  <View className="flex-row justify-between">
+                    <Text className="text-white font-rubik-medium">RRR:</Text>
+                    <Text
+                      className={`font-rubik-bold ${
+                        result.rrr === 'Error' ? 'text-red-500' : 'text-purple-400'
+                      }`}
+                    >
+                      {result.rrr === 'Error' ? 'Error' : `1:${result.rrr}`}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View className="items-center justify-center">
+                  <FontAwesome6
+                    name="info-circle"
+                    size={18}
+                    color="#999"
+                    style={{ marginBottom: 6 }}
+                  />
+                  <Text className="text-sm text-gray-400 italic text-center">
+                    Fill all fields to see take profit metrics
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
-
+        )}
       </ScrollView>
     </SafeAreaView>
   );

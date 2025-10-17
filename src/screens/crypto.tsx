@@ -16,6 +16,7 @@ import images from "../constants/images.ts";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Clipboard from '@react-native-clipboard/clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSettings } from '../context/SettingsContext.tsx';
 
 const Crypto = () => {
 
@@ -43,6 +44,8 @@ const Crypto = () => {
   });
 
   const [, setLastEdited] = useState<'leverage' | 'tradeAmount' | null>(null);
+
+  const { showRiskRewardSection } = useSettings();
 
   const handleCopyToClipboard = async () => {
     if (result.positionSize !== null && result.positionSize !== undefined && result.positionSize !== '0') {
@@ -76,11 +79,8 @@ const Crypto = () => {
     const risk = parseFloat(formData.risk.replace('%', '')) || 0;
     const entry = parseFloat(formData.entryPrice) || 0;
     const stopLoss = parseFloat(formData.stopLoss) || 0;
-    const tradeAmount = Math.abs(parseFloat(formData.tradeAmount) || 0);
-    const leverage = Math.abs(parseFloat(formData.leverage) || 0);
 
-    return capital > 0 && risk > 0 && entry > 0 && stopLoss > 0 &&
-      (tradeAmount > 0 || leverage > 0);
+    return capital > 0 && risk > 0 && entry > 0 && stopLoss > 0;
   };
 
   function calculatePosition(updatedFormData: typeof formData, fieldChanged?: 'leverage' | 'tradeAmount') {
@@ -408,9 +408,8 @@ const Crypto = () => {
         </View>
       </View>
 
-      {/*Take Profit Section*/}
+      {showRiskRewardSection && (
       <View className="mt-0 w-full bg-black-200 border border-white rounded-2xl overflow-hidden mb-2">
-
         {/* Table Grid */}
         <View className="border-t border-white flex-row">
 
@@ -436,7 +435,7 @@ const Crypto = () => {
               <View className="w-full">
                 {/* EP */}
                 <View className="flex-row justify-between border-b border-white/30 pb-2 mb-2">
-                  <Text className="text-white font-rubik-medium">EP:</Text>
+                  <Text className="text-white font-rubik-medium">Profit:</Text>
                   <Text
                     className={`font-rubik-bold ${
                       result.ep === 'Error'
@@ -444,7 +443,7 @@ const Crypto = () => {
                         : 'text-green-400'
                     }`}
                   >
-                    {result.ep}
+                    {`≈${result.ep}`}
                   </Text>
                 </View>
 
@@ -484,7 +483,7 @@ const Crypto = () => {
           </View>
         </View>
       </View>
-
+      )}
     </>
   );
 

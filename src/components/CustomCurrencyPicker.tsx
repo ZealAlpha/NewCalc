@@ -27,7 +27,7 @@ type CurrencyItem = {
 
 export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fetchExchangeRate }: Props) {
     const [modalVisible, setModalVisible] = useState(false);
-    const [activeTab, setActiveTab] = useState<'Forex' | 'Crypto' | 'Commodities' | 'Indices'>('Forex');
+    const [activeTab, setActiveTab] = useState<'All' | 'Forex' | 'Crypto' | 'Commodities' | 'Indices'>('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -79,6 +79,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         { label: 'AUDTRY', value: 'AUDTRY', description: 'Australian Dollar/Turkish Lira' },
         { label: 'CADSGD', value: 'CADSGD', description: 'Canadian Dollar/Singapore Dollar' },
         { label: 'CHFSGD', value: 'CHFSGD', description: 'Swiss Franc/Singapore Dollar' },
+        { label: 'GBPCHF', value: 'GBPCHF', description: 'Great British Pound/Swiss Franc' },
         { label: 'EURCZK', value: 'EURCZK', description: 'Euro/Czech Koruna' },
         { label: 'EURDKK', value: 'EURDKK', description: 'Euro/Danish Krone' },
         { label: 'EURHKD', value: 'EURHKD', description: 'Euro/Hong Kong Dollar' },
@@ -245,20 +246,24 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         return value; // fallback to value if not found
     };
 
-    const getActivePairs = (): CurrencyItem[] => {
-        switch (activeTab) {
-            case 'Forex':
-                return forexPairs;
-            case 'Crypto':
-                return cryptoPairs;
-            case 'Commodities':
-                return commoditiesPairs;
-            case 'Indices':
-                return indicesPairs;
-             default:
-                return [];
-        }
-    };
+  const getActivePairs = (): CurrencyItem[] => {
+    switch (activeTab) {
+      case 'All':
+        return Object.entries(allData).flatMap(([category, items]) =>
+          items.map(item => ({ ...item, category }))
+        );
+      case 'Forex':
+        return forexPairs;
+      case 'Crypto':
+        return cryptoPairs;
+      case 'Commodities':
+        return commoditiesPairs;
+      case 'Indices':
+        return indicesPairs;
+      default:
+        return [];
+    }
+  };
 
     // Updated filtering logic to search across all tabs
     const getFilteredItems = (): CurrencyItem[] => {
@@ -303,7 +308,8 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                             {/* Tabs */}
                             <View className="flex-row justify-around mb-4">
                                 <ScrollView horizontal showsHorizontalScrollIndicator={true} className="mb-4">
-                                    {['Forex',
+                                    {['All',
+                                      'Forex',
                                       'Crypto',
                                       'Commodities',
                                       'Indices'

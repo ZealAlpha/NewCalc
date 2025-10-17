@@ -1,10 +1,12 @@
 import React, { useContext, useState } from 'react';
-import { View, Text, Modal, Pressable, Linking, Share, Platform, ScrollView } from 'react-native';
+import { View, Text, Modal, Pressable, Linking, Share, Platform, ScrollView, Switch } from 'react-native';
 import { ThemeContext } from '../components/ThemeContext.tsx';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
+import { useSettings } from '../context/SettingsContext.tsx';
 
 const Settings = () => {
     const { theme } = useContext(ThemeContext);
+    const { showRiskRewardSection, setShowRiskRewardSection } = useSettings();
     const [modalVisible, setModalVisible] = useState(false);
     const [modalContent, setModalContent] = useState('');
     const isDark = theme === 'dark';
@@ -42,6 +44,38 @@ const Settings = () => {
                     <FontAwesome6 name={isDark ? 'moon' : 'sun'} iconStyle={isDark ? 'solid' : 'regular'} size={24} color={isDark ? 'white' : 'black'} />
                     <Text className={`ml-2 text-lg ${isDark ? 'text-white' : 'text-black-300'}`}>Dark Mode: </Text>
                     <Text className="ml-4 font-rubik-bold dark:text-white text-black-300">System</Text>
+                </View>
+
+                <View className="w-full mb-1 px-2">
+                  <View className="dark:bg-black-200 bg-gray-50 border border-primary-100 rounded-lg p-4">
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1 mr-4">
+                        <Text className="dark:text-white text-black-300 font-rubik-medium text-base mb-1">
+                          Show Risk/Reward Section
+                        </Text>
+                        <Text className="text-gray-500 dark:text-gray-400 font-rubik text-sm">
+                          Display take profit and RRR section
+                        </Text>
+                      </View>
+
+                      <View
+                        className={`p-[2px] rounded-full ${
+                          showRiskRewardSection ? 'bg-primary-500/20' : 'bg-gray-300/40'
+                        }`}
+                      >
+                        <Switch
+                          value={showRiskRewardSection}
+                          onValueChange={setShowRiskRewardSection}
+                          trackColor={{ false: '#d1d5db', true: '#f97316' }}
+                          thumbColor={showRiskRewardSection ? '#fff' : '#f9fafb'}
+                          ios_backgroundColor="#d1d5db"
+                          style={{
+                            transform: [{ scale: Platform.OS === 'ios' ? 0.9 : 1 }],
+                          }}
+                        />
+                      </View>
+                    </View>
+                  </View>
                 </View>
 
                 <View className="w-full space-y-4 mt-14">

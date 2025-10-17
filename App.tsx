@@ -7,6 +7,7 @@ import Premium from './src/screens/premium';
 import CodePush from "@code-push-next/react-native-code-push";
 import { useAppRating } from './src/hooks/useAppRating';
 import { RatingModal } from './src/components/RatingModal';
+import { SettingsProvider } from './src/context/SettingsContext';
 
 // Screens
 import Index from './src/screens/index';
@@ -95,13 +96,15 @@ export default function App() {
 
 
         {/* ✅ Navigation screens */}
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Index" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Index" component={Index} />
-            <Stack.Screen name="Layout" component={_layout} />
-            <Stack.Screen name="Premium" component={Premium} />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <SettingsProvider>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Index" screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="Index" component={Index} />
+                <Stack.Screen name="Layout" component={_layout} />
+                <Stack.Screen name="Premium" component={Premium} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </SettingsProvider>
         {/*/!* ✅ Show banner only after interstitial is closed *!/*/}
         {/*{showBanner && (*/}
         {/*  <BannerAd*/}

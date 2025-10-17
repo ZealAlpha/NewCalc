@@ -5,6 +5,10 @@ import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import CustomCurrencyPicker from '../components/CustomCurrencyPicker.tsx';
 import CurrencyPickerModal from "../components/CurrencyPickerModal.tsx";
 import EnhancedTextInput from "../components/EnhancedTextInput.tsx";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRef } from 'react';
+import { ToastAndroid, Alert, Platform } from 'react-native';
+import { useSettings } from '../context/SettingsContext.tsx';
 
 
 const Forex = () => {
@@ -88,6 +92,8 @@ const Forex = () => {
   const cache: Record<string, CacheEntry> = {};
   const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutes
 
+  const { showRiskRewardSection } = useSettings();
+
   const getCachedRate = (pair: string | number) => {
     const cached = cache[pair];
     if (!cached) return null;
@@ -130,6 +136,7 @@ const Forex = () => {
         }
 
         // 2) If this is an index, fetch the conversion between index quote currency and account currency.
+        // @ts-ignore
         const quoteCurrency = indicesQuoteCurrencies[originalPair];
         if (quoteCurrency && accountCurrency !== quoteCurrency) {
           // Preferred pair: accountCurrency + quoteCurrency (e.g. USDJPY)
@@ -260,6 +267,7 @@ const Forex = () => {
         pipValue = 0.01 * parseFloat(quoteToAccountRate);
       }
     } else if (isIndices) {
+      // @ts-ignore
       const indexQuoteCurrency = indicesQuoteCurrencies[currencyPair];
       if (accountCurrency === indexQuoteCurrency) {
         pipValue = 0.01; // Default pip value when currencies match
@@ -404,44 +412,38 @@ const Forex = () => {
       setStopLossPrice(calculatedSlPrice.toFixed(isCryptoPair ? 1 : (isJPYQuote ? 3 : 5)));
     }
 
-// Skip Take Profit calculation entirely if user hasn't entered any TP or TPP
-    if (!takeProfitPrice && (!takeProfitPip || takeProfitPip === "0")) {
-      setRrr("0");
-      setXp("0");
-      return;
-    }
-
     let tpp = 0;
-    if (tp && ep) {
-      if (isCryptoPair) tpp = Math.abs(tp - ep) * 100;
-      else if (isIndices || isCommodities || isJPYQuote) tpp = Math.abs(tp - ep) * 100;
-      else if (isNG) tpp = Math.abs(tp - ep) * 1000;
-      else tpp = Math.abs(tp - ep) * 10000;
 
-      setTakeProfitPip(tpp.toFixed(2));
-    }
+    // Only calculate RRR & EP if TP or TPP exists
+    if (takeProfitPrice || (takeProfitPip && takeProfitPip !== "0")) {
+      if (tp && ep) {
+        if (isCryptoPair) tpp = Math.abs(tp - ep) * 100;
+        else if (isIndices || isCommodities || isJPYQuote) tpp = Math.abs(tp - ep) * 100;
+        else if (isNG) tpp = Math.abs(tp - ep) * 1000;
+        else tpp = Math.abs(tp - ep) * 10000;
 
-// ✅ Validate TP/SL relationship with Entry
-    const isInvalidRange = (ep <= slPrice && ep <= tp) || (ep >= slPrice && ep >= tp);
-    if (isInvalidRange) {
-      setRrr("Error");
-      setXp("Error");
-      return;
-    }
+        setTakeProfitPip(tpp.toFixed(2));
+      }
 
-// ✅ Calculate RRR and EP if valid and TP is entered
-    if (tpp > 0 && calculatedSlPips > 0 && calculatedRiskAmount > 0) {
-      const riskrr = tpp / calculatedSlPips;
-      const expectedProfit = riskrr * calculatedRiskAmount;
-
-      setRrr(riskrr.toFixed(2));
-      setXp(expectedProfit.toFixed(2));
+      // Validate range (entry must be between SL and TP)
+      const isInvalidRange = (ep <= slPrice && ep <= tp) || (ep >= slPrice && ep >= tp);
+      if (isInvalidRange) {
+        setRrr("Error");
+        setXp("Error");
+      } else if (tpp > 0 && calculatedSlPips > 0 && calculatedRiskAmount > 0) {
+        const riskrr = tpp / calculatedSlPips;
+        const expectedProfit = riskrr * calculatedRiskAmount;
+        setRrr(riskrr.toFixed(2));
+        setXp(expectedProfit.toFixed(2));
+      } else {
+        setRrr("0");
+        setXp("0");
+      }
     } else {
+      // If no Take Profit entered, clear RRR and EP but still calculate rest of data
       setRrr("0");
       setXp("0");
     }
-
-
 
     if (calculatedRiskAmount > 0 && calculatedSlPips > 0 && pv > 0) {
       let baseLotsResult = calculatedRiskAmount / (calculatedSlPips * pv);
@@ -454,9 +456,9 @@ const Forex = () => {
         setMicroLots((standardLotsResult * 100).toFixed(0));
         setUnits(Math.round(baseLotsResult).toString());
       } else {
-        setStandardLots(baseLotsResult.toFixed(2));
-        setMiniLots((baseLotsResult * 10).toFixed(1));
-        setMicroLots((baseLotsResult * 100).toFixed(0));
+        setStandardLots(baseLotsResult.toFixed(3));
+        setMiniLots((baseLotsResult * 10).toFixed(2));
+        setMicroLots((baseLotsResult * 100).toFixed(1));
 
         const lotMultiplier = isIndices ? 100 :
           (isCryptoPair ? 1 :
@@ -654,27 +656,162 @@ const Forex = () => {
     resetOutputs();
   };
 
-  const handleReset = useCallback(() => {
-    setAccountBalance('');
-    setRiskPercentage('');
-    setRiskAmount('');
-    setStopLossPips('');
-    setStopLossPrice('');
-    setEntryPrice('');
-    setPipValuePerLot('0');
-    setUnits('0');
-    setStandardLots('0');
-    setMiniLots('0');
-    setMicroLots('0');
-    setRrr('0');
-    setXp('0');
-    setTakeProfitPrice('');
-    setTakeProfitPip('');
-    setIsEntryPriceManuallyEdited(false);
-    // setCurrencyPair('EURUSD');
-    setAccountCurrency('USD');
-    setQuoteToAccountRate('1');
+  // 💾 Persist Account Balance and Risk Percentage
+  useEffect(() => {
+    const saveUserInputs = async () => {
+      try {
+        if (accountBalance) {
+          await AsyncStorage.setItem('accountBalance', accountBalance);
+        }
+        if (riskPercentage) {
+          await AsyncStorage.setItem('riskPercentage', riskPercentage);
+        }
+      } catch (error) {
+        console.warn('Error saving data to storage:', error);
+      }
+    };
+    saveUserInputs();
+  }, [accountBalance, riskPercentage]);
+
+  // ♻️ Load saved Account Balance and Risk Percentage on startup
+  useEffect(() => {
+    const loadUserInputs = async () => {
+      try {
+        const savedBalance = await AsyncStorage.getItem('accountBalance');
+        const savedRisk = await AsyncStorage.getItem('riskPercentage');
+
+        if (savedBalance !== null) {
+          setAccountBalance(savedBalance);
+        }
+        if (savedRisk !== null) {
+          setRiskPercentage(savedRisk);
+        }
+      } catch (error) {
+        console.warn('Error loading data from storage:', error);
+      }
+    };
+    loadUserInputs();
   }, []);
+
+  const lastPress = useRef(0);
+  const singlePressTimer = useRef(null);
+
+  const handleReset = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+
+    // ✅ Detect Double-Tap
+    if (now - lastPress.current < DOUBLE_PRESS_DELAY) {
+      // 🔹 Double-tap detected → clear timeout first
+      if (singlePressTimer.current) {
+        clearTimeout(singlePressTimer.current);
+        singlePressTimer.current = null;
+      }
+
+      // 🔹 Clear AsyncStorage and reset everything
+      (async () => {
+        try {
+          await AsyncStorage.multiRemove(['accountBalance', 'riskPercentage']);
+          setAccountBalance('');
+          setRiskPercentage('');
+          setRiskAmount('');
+          setStopLossPips('');
+          setStopLossPrice('');
+          setEntryPrice('');
+          setPipValuePerLot('0');
+          setUnits('0');
+          setStandardLots('0');
+          setMiniLots('0');
+          setMicroLots('0');
+          setRrr('0');
+          setXp('0');
+          setTakeProfitPrice('');
+          setTakeProfitPip('');
+          setIsEntryPriceManuallyEdited(false);
+          // setCurrencyPair('EURUSD');
+          // setAccountCurrency('USD');
+          setQuoteToAccountRate('1');
+          setTakeProfitPrice('');
+          setTakeProfitPip('0');
+          setRrr('0');
+          setXp('0');
+
+          if (Platform.OS === 'android') {
+            ToastAndroid.show('All saved data has been removed.', ToastAndroid.SHORT);
+          } else {
+            Alert.alert('Data Cleared', 'All saved data has been removed.');
+          }
+        } catch (error) {
+          console.warn('Error clearing AsyncStorage:', error);
+        }
+      })();
+
+      lastPress.current = 0; // reset timer
+    } else {
+      // 🟡 Single tap → wait to check if another tap comes
+      // @ts-ignore
+      singlePressTimer.current = setTimeout(() => {
+        // Only clear form values (keep AsyncStorage)
+        setStopLossPips('');
+        setStopLossPrice('');
+        setEntryPrice('');
+        setPipValuePerLot('0');
+        setUnits('0');
+        setStandardLots('0');
+        setMiniLots('0');
+        setMicroLots('0');
+        setRrr('0');
+        setXp('0');
+        setTakeProfitPrice('');
+        setTakeProfitPip('');
+        setIsEntryPriceManuallyEdited(false);
+        // setCurrencyPair('EURUSD');
+        // setAccountCurrency('USD');
+        setQuoteToAccountRate('1');
+        setTakeProfitPrice('');
+        setTakeProfitPip('0');
+        setRrr('0');
+        setXp('0');
+
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Fields cleared (saved data preserved).', ToastAndroid.SHORT);
+        } else {
+          Alert.alert('Form Reset', 'Fields cleared (saved data preserved).');
+        }
+      }, DOUBLE_PRESS_DELAY);
+
+      lastPress.current = now;
+    }
+  };
+
+  const getUnitLabel = () => {
+    if (!currencyPair) return 'Units';
+
+    const pair = currencyPair.toUpperCase();
+
+    // 🟨 Precious Metals (Gold, Silver, Palladium, Platinum)
+    if (['XAUUSD', 'XAGUSD', 'XPTUSD', 'XPDUSD', 'GCUSD', 'SIUSD', 'PAUSD', 'PLUSD'].includes(pair)) {
+      return 'Ounce';
+    }
+
+    // 🟧 Energy Commodities (Brent Oil, Crude Oil, Natural Gas)
+    if (['XBRUSD', 'BZUSD', 'CLUSD', 'XTIUSD', 'NGUSD', 'XNGUSD'].includes(pair)) {
+      return 'Barrel';
+    }
+
+    const isNeededIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
+      .some(sym => currencyPair.startsWith(sym));
+
+    // 🟥 Indices (contracts)
+    if (
+      isNeededIndices
+    ) {
+      return 'Contract';
+    }
+
+    return 'Units'; // fallback
+  };
+
 
   return (
     <SafeAreaView className="bg-white dark:bg-black-300 h-full p-4">
@@ -804,7 +941,7 @@ const Forex = () => {
           </View>
         </View>
 
-        <View className="items-center mt-1">
+        <View className="items-center mt-3">
           <View className="flex-row items-center space-x-3">
             <TouchableOpacity
               onPress={calculatePosition}
@@ -819,7 +956,7 @@ const Forex = () => {
           </View>
         </View>
 
-        <View className="mt-2 w-full bg-secondary-100 border border-white rounded-2xl overflow-hidden mb-1">
+        <View className="mt-4 w-full bg-secondary-100 border border-white rounded-2xl overflow-hidden mb-2">
 
           {/* Units Row */}
           <View className="flex-row items-center justify-between border-b border-white px-4 py-3">
@@ -834,7 +971,7 @@ const Forex = () => {
             <View className="flex-row border-b border-white">
               {/* Standard Lots */}
               <View className="w-1/2 border-r border-white px-4 py-3 flex-row items-center justify-between">
-                <Text className="text-white font-rubik-medium">Units:</Text>
+                <Text className="text-white font-rubik-medium">{getUnitLabel()}:</Text>
                 <Text className="text-white font-rubik-medium">
                   {units ? parseFloat(units).toLocaleString() : '0'}
                 </Text>
@@ -869,67 +1006,66 @@ const Forex = () => {
           </View>
         </View>
 
-        <View className="mt-0 w-full bg-black-200 border border-white rounded-2xl overflow-hidden mb-2">
+        {showRiskRewardSection && (
+          <View className="mt-3 w-full bg-black-200 border border-white rounded-2xl overflow-hidden mb-2">
+            {/* 2x2 Table Grid with merged right column */}
+            <View className="border-t border-white flex-row">
+              {/* Left Column (Take Profit Inputs) */}
+              <View className="w-1/2 border-r border-white">
+                {/* Top Cell - Take Profit Price */}
+                <View className="border-b border-white px-4 py-3 items-center justify-center">
+                  <View className="w-full">
+                    <TextInput
+                      className="p-4 border border-accent-100 rounded-md text-white"
+                      placeholder="Take Profit Price"
+                      placeholderTextColor="#808080"
+                      value={takeProfitPrice}
+                      onChangeText={handleTakeProfitChange}
+                      keyboardType="numeric"
+                    />
+                  </View>
+                </View>
 
-          {/* 2x2 Table Grid with merged right column */}
-          <View className="border-t border-white flex-row">
-
-            {/* Left Column (Take Profit Inputs) */}
-            <View className="w-1/2 border-r border-white">
-              {/* Top Cell - Take Profit Price */}
-              <View className="border-b border-white px-4 py-3 items-center justify-center">
-                <View className="w-full">
-                  <TextInput
-                    className="p-4 border border-accent-100 rounded-md text-white"
-                    placeholder="Take Profit Price"
-                    placeholderTextColor="#808080"
-                    value={takeProfitPrice}
-                    onChangeText={handleTakeProfitChange}
-                    keyboardType="numeric"
-                  />
+                {/* Bottom Cell - Take Profit Pips */}
+                <View className="px-4 py-3 items-center justify-center">
+                  <View className="w-full">
+                    <TextInput
+                      className="p-4 border border-accent-100 rounded-md text-white"
+                      placeholder="Take Profit Pips"
+                      placeholderTextColor="#808080"
+                      value={takeProfitPip}
+                      onChangeText={handleTakeProfitPipsChange}
+                      keyboardType="numeric"
+                    />
+                  </View>
                 </View>
               </View>
 
-              {/* Bottom Cell - Take Profit Pips */}
-              <View className="px-4 py-3 items-center justify-center">
-                <View className="w-full">
-                  <TextInput
-                    className="p-4 border border-accent-100 rounded-md text-white"
-                    placeholder="Take Profit Pips"
-                    placeholderTextColor="#808080"
-                    value={takeProfitPip}
-                    onChangeText={handleTakeProfitPipsChange}
-                    keyboardType="numeric"
-                  />
+              {/* Right Column (EP, Risk, RRR vertically stacked) */}
+              <View className="w-1/2 px-4 py-3 justify-between">
+                {/* EP */}
+                <View className="flex-row items-center justify-between border-b border-white pb-3 mb-3">
+                  <Text className="text-white font-rubik-medium">Profit:</Text>
+                  <Text className="text-green-600 font-rubik-medium">{`≈${getCurrencySymbol(accountCurrency)}${xp}`}</Text>
                 </View>
-              </View>
-            </View>
 
-            {/* Right Column (EP, Risk, RRR vertically stacked) */}
-            <View className="w-1/2 px-4 py-3 justify-between">
-              {/* EP */}
-              <View className="flex-row items-center justify-between border-b border-white pb-3 mb-3">
-                <Text className="text-white font-rubik-medium">EP:</Text>
-                <Text className="text-white font-rubik-medium">{xp}</Text>
-              </View>
+                {/* Risk */}
+                <View className="flex-row items-center justify-between border-b border-white pb-3 mb-3">
+                  <Text className="text-white font-rubik-medium">Risk:</Text>
+                  <Text className="text-red-400 font-rubik-medium">
+                    {riskAmount || '0'}
+                  </Text>
+                </View>
 
-              {/* Risk */}
-              <View className="flex-row items-center justify-between border-b border-white pb-3 mb-3">
-                <Text className="text-white font-rubik-medium">Risk:</Text>
-                <Text className="text-white font-rubik-medium">
-                  {riskAmount || '0'}
-                </Text>
-              </View>
-
-              {/* RRR */}
-              <View className="flex-row items-center justify-between">
-                <Text className="text-white font-rubik-medium">RRR:</Text>
-                <Text className="text-white font-rubik-medium">{rrr}</Text>
+                {/* RRR */}
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-white font-rubik-medium">RRR:</Text>
+                  <Text className="text-purple-600 font-rubik-medium">{`1:${rrr}`}</Text>
+                </View>
               </View>
             </View>
           </View>
-        </View>
-
+        )}
       </ScrollView>
     </SafeAreaView>
   );
