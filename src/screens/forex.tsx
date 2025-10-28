@@ -32,6 +32,36 @@ const Forex = () => {
     '^XNDX': 'USD',
   }), []);
 
+  // Helper function to extract quote currency based on pair length and type
+  const getQuoteCurrency = useCallback((pair: string): string => {
+    // Check if it's an index first
+    if (indicesQuoteCurrencies[pair]) {
+      return indicesQuoteCurrencies[pair];
+    }
+
+    // For crypto pairs with 7 characters
+    if (pair.length === 7) {
+      // Check if it starts with known 3-letter crypto symbols
+      const threeLetterCryptos = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB'];
+      if (threeLetterCryptos.some(sym => pair.startsWith(sym))) {
+        return pair.substring(3, 7); // BTCBUSD → BUSD
+      }
+      // Check if it starts with known 4-letter crypto symbols
+      const fourLetterCryptos = ['DOGE'];
+      if (fourLetterCryptos.some(sym => pair.startsWith(sym))) {
+        return pair.substring(4, 7); // DOGEUSD → USD
+      }
+    }
+
+    // For commodities with 5 characters
+    if (pair.length === 5) {
+      return pair.substring(2, 5); // GCUSD → USD
+    }
+
+    // Default for 6-char forex pairs
+    return pair.substring(3, 6); // EURUSD → USD
+  }, [indicesQuoteCurrencies]);
+
   const getCurrencySymbol = (currencyCode: string) => {
     switch (currencyCode) {
       case 'USD': return '$';
@@ -42,20 +72,6 @@ const Forex = () => {
       case 'CAD': return 'CA$';
       case 'AUD': return 'AU$';
       case 'NZD': return 'NZ$';
-      // case 'CNY': case 'CNH': return '¥';
-      // case 'CZK': return 'Kč';
-      // case 'DKK': return 'kr ';
-      // case 'HKD': return 'HK$';
-      // case 'KRW': return '₩';
-      // case 'KWD': return 'KD ';
-      // case 'INR': return '₹';
-      // case 'MXN': return 'Mex$';
-      // case 'NOK': return 'kr ';
-      // case 'PLN': return 'zł ';
-      // case 'RUB': return '₽';
-      // case 'SEK': return 'kr ';
-      // case 'SGD': return 'S$';
-      // case 'TRY': return '₺';
       case 'ZAR': return 'R ';
       default: return '';
     }
@@ -213,12 +229,17 @@ const Forex = () => {
       // The conversion is handled in the fetchExchangeRate function
       setQuoteToAccountRate('1'); // Default to 1, actual conversion handled via IndicesExchangeRate
     } else {
-      // Original logic for non-indices
-      const quoteCurrency = currencyPair.substring(3, 6);
+      // Step 1: Extract quote currency using helper function
+      const quoteCurrency = getQuoteCurrency(currencyPair);
 
       if (quoteCurrency !== accountCurrency) {
         setLoading(true);
-        const pair = `${quoteCurrency}${accountCurrency}`;
+
+        // Step 2: Convert BUSD to USD (since they're pegged 1:1)
+        const effectiveQuoteCurrency = quoteCurrency === 'BUSD' ? 'USD' : quoteCurrency;
+
+        // Step 3: Fetch conversion rate (e.g., USDGBP ≈ 0.749)
+        const pair = `${effectiveQuoteCurrency}${accountCurrency}`;
 
         fetch(`https://financialmodelingprep.com/api/v3/quote/${pair}?apikey=${API_KEY}`)
           .then(res => res.json())
@@ -239,31 +260,31 @@ const Forex = () => {
         setQuoteToAccountRate('1');
       }
     }
-  }, [currencyPair, accountCurrency, API_KEY, indicesPairs]);
+  }, [currencyPair, accountCurrency, API_KEY, indicesPairs, getQuoteCurrency]);
 
   useEffect(() => {
     if (!entryPrice || parseFloat(entryPrice) === 0) return;
 
-    const quoteCurrency = indicesQuoteCurrencies[currencyPair] || currencyPair.substring(3, 6);
+    const quoteCurrency = getQuoteCurrency(currencyPair);
     const baseCurrency = currencyPair.substring(0, 3);
     const commoditiesBaseCurrency = currencyPair.substring(0, 2);
     const isJPYQuote = quoteCurrency === 'JPY';
-    const isXAG = commoditiesBaseCurrency === 'SI';
+    const isXAG = commoditiesBaseCurrency === 'SI' || currencyPair.startsWith('XAGUSD');
     const isJPYBase = baseCurrency === 'JPY';
     const isNG = currencyPair.startsWith('NGUSD');
     const isIndices = indicesPairs.includes(currencyPair);
     const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG'].some(sym => currencyPair.startsWith(sym));
-    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD'].some(sym => currencyPair.startsWith(sym));
+    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD', 'XAUUSD', 'XAGUSD', 'XTIUSD', 'XBRUSD'].some(sym => currencyPair.startsWith(sym));
 
     let pipValue;
 
     if (isCryptoPair) {
-      // For crypto pairs, pip value is typically 1.00 per unit
-      if (accountCurrency === quoteCurrency) {
-        pipValue = 0.01;
-      } else if (accountCurrency === 'USD') {
+      // Step 4: Calculate pip value (0.01 × 0.749 = £0.00749)
+      // For crypto pairs, pip value is typically 0.01 per unit
+      if (accountCurrency === quoteCurrency || accountCurrency === 'USD' && quoteCurrency === 'BUSD') {
         pipValue = 0.01;
       } else {
+        // Use the fetched conversion rate (quoteToAccountRate)
         pipValue = 0.01 * parseFloat(quoteToAccountRate);
       }
     } else if (isIndices) {
@@ -316,14 +337,16 @@ const Forex = () => {
       } else {
         pipValue = parseFloat(quoteToAccountRate);
       }
-    }else if (isCommodities) {
-      // Existing commodities logic
+    } else if (isCommodities) {
+      // Commodities: $1 per lot per pip (except Silver and Natural Gas handled above)
       if (accountCurrency === quoteCurrency) {
         pipValue = 1;
       } else if (accountCurrency === 'USD') {
         pipValue = 1;
       } else {
-        pipValue = parseFloat(quoteToAccountRate);
+        // quoteToAccountRate is USDGBP (e.g., 0.749), which is correct
+        // $1 × 0.749 = £0.749
+        pipValue = 1 * parseFloat(quoteToAccountRate);
       }
     } else {
       // Existing forex logic
@@ -341,7 +364,7 @@ const Forex = () => {
     }
 
     setPipValuePerLot(pipValue.toFixed(4));
-  }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate, IndicesExchangeRate, indicesQuoteCurrencies, indicesPairs]);
+  }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate, IndicesExchangeRate, indicesQuoteCurrencies, indicesPairs, getQuoteCurrency]);
 
   const calculatePosition = useCallback(() => {
     const ab = parseFloat(accountBalance) || 0;
@@ -352,7 +375,7 @@ const Forex = () => {
     const ep = parseFloat(entryPrice) || 0;
     const slPrice = parseFloat(stopLossPrice) || 0;
     const commoditiesBaseCurrency = currencyPair.substring(0, 2);
-    const quoteCurrency = currencyPair.substring(3, 6);
+    const quoteCurrency = getQuoteCurrency(currencyPair);
     const isJPYQuote = quoteCurrency === 'JPY';
     const isXAG = commoditiesBaseCurrency === 'SI';
     const isNG = commoditiesBaseCurrency === 'NG';
@@ -363,7 +386,7 @@ const Forex = () => {
       .some(sym => currencyPair.startsWith(sym));
     const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
       .some(sym => currencyPair.startsWith(sym));
-    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
+    const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD', 'XAUUSD', 'XAGUSD', 'XTIUSD', 'XBRUSD']
       .some(sym => currencyPair.startsWith(sym));
 
     let calculatedRiskAmount = ra;
@@ -476,7 +499,7 @@ const Forex = () => {
       setMicroLots('0');
     }
     setIsCalculated(true);
-  }, [accountBalance, riskPercentage, riskAmount, stopLossPips, pipValuePerLot, entryPrice, stopLossPrice, currencyPair, takeProfitPrice, takeProfitPip]);
+  }, [accountBalance, riskPercentage, riskAmount, stopLossPips, pipValuePerLot, entryPrice, stopLossPrice, currencyPair, takeProfitPrice, takeProfitPip, getQuoteCurrency]);
 
 
   const resetOutputs = () => {
@@ -499,12 +522,12 @@ const Forex = () => {
     const tp = parseFloat(value) || 0;
     if (!ep || !tp) return;
 
-    const quoteCurrency = currencyPair.substring(3, 6);
+    const quoteCurrency = getQuoteCurrency(currencyPair);
     const isJPY = quoteCurrency === "JPY";
     const isNG = currencyPair.startsWith("NGUSD");
     const isCrypto = ["BTC", "ETH", "SOL", "BNB", "DOG", "XRP"].some(sym => currencyPair.startsWith(sym));
     const isIndices = currencyPair.startsWith("^");
-    const isCommodities = ["PLUSD","GCUSD","SIUSD","NGUSD","CLUSD","PAUSD","BZUSD"].some(sym => currencyPair.startsWith(sym));
+    const isCommodities = ["PLUSD","GCUSD","SIUSD","NGUSD","CLUSD","PAUSD","BZUSD","XAUUSD","XAGUSD","XTIUSD","XBRUSD"].some(sym => currencyPair.startsWith(sym));
 
     let tpp = 0;
     if (isCrypto) tpp = Math.abs(tp - ep) * 100;
@@ -521,12 +544,12 @@ const Forex = () => {
     const tpp = parseFloat(value) || 0;
     if (!ep || !tpp) return;
 
-    const quoteCurrency = currencyPair.substring(3, 6);
+    const quoteCurrency = getQuoteCurrency(currencyPair);
     const isJPY = quoteCurrency === "JPY";
     const isNG = currencyPair.startsWith("NGUSD");
     const isCrypto = ["BTC", "ETH", "SOL", "BNB", "DOG", "XRP"].some(sym => currencyPair.startsWith(sym));
     const isIndices = currencyPair.startsWith("^");
-    const isCommodities = ["PLUSD","GCUSD","SIUSD","NGUSD","CLUSD","PAUSD","BZUSD"].some(sym => currencyPair.startsWith(sym));
+    const isCommodities = ["PLUSD","GCUSD","SIUSD","NGUSD","CLUSD","PAUSD","BZUSD","XAUUSD","XAGUSD","XTIUSD","XBRUSD"].some(sym => currencyPair.startsWith(sym));
 
     let tp = ep;
     if (isCrypto) tp = ep + tpp / 100;
@@ -570,7 +593,7 @@ const Forex = () => {
       const slPrice = parseFloat(value) || 0;
 
       // Get instrument type data
-      const quoteCurrency = currencyPair.substring(3, 6);
+      const quoteCurrency = getQuoteCurrency(currencyPair);
       const isJPYQuote = quoteCurrency === 'JPY';
       const isNG = currencyPair.startsWith('NGUSD');
       const isDoge = currencyPair.startsWith('DOG');
@@ -579,7 +602,7 @@ const Forex = () => {
         .some(sym => currencyPair.startsWith(sym));
       const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
         .some(sym => currencyPair.startsWith(sym));
-      const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
+      const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD', 'XAUUSD', 'XAGUSD', 'XTIUSD', 'XBRUSD']
         .some(sym => currencyPair.startsWith(sym));
 
       let calculatedSlPips;
@@ -612,8 +635,7 @@ const Forex = () => {
       const direction = -1; // Assuming long position (SL below entry)
 
       // Get instrument type data
-      // const commoditiesBaseCurrency = currencyPair.substring(0, 2);
-      const quoteCurrency = currencyPair.substring(3, 6);
+      const quoteCurrency = getQuoteCurrency(currencyPair);
       const isJPYQuote = quoteCurrency === 'JPY';
       const isNG = currencyPair.startsWith('NGUSD');
       const isDoge = currencyPair.startsWith('DOG');
@@ -622,7 +644,7 @@ const Forex = () => {
         .some(sym => currencyPair.startsWith(sym));
       const isCryptoPair = ['BTC', 'ETH', 'XRP', 'SOL', 'BNB', 'DOG']
         .some(sym => currencyPair.startsWith(sym));
-      const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD']
+      const isCommodities = ['PLUSD', 'GCUSD', 'SIUSD', 'NGUSD', 'CLUSD', 'PAUSD', 'BZUSD', 'XAUUSD', 'XAGUSD', 'XTIUSD', 'XBRUSD']
         .some(sym => currencyPair.startsWith(sym));
 
       let calculatedSlPrice;
@@ -728,8 +750,6 @@ const Forex = () => {
           setTakeProfitPrice('');
           setTakeProfitPip('');
           setIsEntryPriceManuallyEdited(false);
-          // setCurrencyPair('EURUSD');
-          // setAccountCurrency('USD');
           setQuoteToAccountRate('1');
           setTakeProfitPrice('');
           setTakeProfitPip('0');
@@ -765,8 +785,6 @@ const Forex = () => {
         setTakeProfitPrice('');
         setTakeProfitPip('');
         setIsEntryPriceManuallyEdited(false);
-        // setCurrencyPair('EURUSD');
-        // setAccountCurrency('USD');
         setQuoteToAccountRate('1');
         setTakeProfitPrice('');
         setTakeProfitPip('0');
@@ -803,9 +821,7 @@ const Forex = () => {
       .some(sym => currencyPair.startsWith(sym));
 
     // 🟥 Indices (contracts)
-    if (
-      isNeededIndices
-    ) {
+    if (isNeededIndices) {
       return 'Contract';
     }
 
