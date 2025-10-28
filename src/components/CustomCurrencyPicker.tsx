@@ -35,6 +35,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         setCurrencyPair(item.value);
         fetchExchangeRate(item.value);
         setModalVisible(false);
+        setSearchTerm('');
     };
 
     const toggleFavorite = async (value: string) => {

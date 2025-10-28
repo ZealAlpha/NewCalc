@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, TextInput, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import DerivPicker from '../components/DerivPicker.tsx';
-import CurrencyPickerModal from "../components/CurrencyPickerModal.tsx";
+import CurrencyPickerModalDeriv from "../components/CurrencyPickerModalDeriv.tsx";
 import EnhancedTextInput from "../components/EnhancedTextInput.tsx";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ToastAndroid, Alert, Platform } from 'react-native';
@@ -158,28 +158,6 @@ const Deriv = () => {
   const getCurrencySymbol = (currencyCode: string) => {
     switch (currencyCode) {
       case 'USD': return '$';
-      case 'EUR': return '€';
-      case 'GBP': return '£';
-      case 'JPY': return '¥';
-      case 'CHF': return 'CHF ';
-      case 'CAD': return 'CA$';
-      case 'AUD': return 'AU$';
-      case 'NZD': return 'NZ$';
-      // case 'CNY': case 'CNH': return '¥';
-      // case 'CZK': return 'Kč';
-      // case 'DKK': return 'kr ';
-      // case 'HKD': return 'HK$';
-      // case 'KRW': return '₩';
-      // case 'KWD': return 'KD ';
-      // case 'INR': return '₹';
-      // case 'MXN': return 'Mex$';
-      // case 'NOK': return 'kr ';
-      // case 'PLN': return 'zł ';
-      // case 'RUB': return '₽';
-      // case 'SEK': return 'kr ';
-      // case 'SGD': return 'S$';
-      // case 'TRY': return '₺';
-      case 'ZAR': return 'R ';
       default: return '';
     }
   };
@@ -586,11 +564,11 @@ const Deriv = () => {
         // Only clear form values (keep AsyncStorage)
         setEntryPrice('');
         setStopLossPrice('');
-        setEntryPrice('');
-        setPipValuePerLot('0');
-        setStandardLots('0');
-        setTakeProfit('');
-        setResult({ ep: '0', rrr: '0' });
+        // setEntryPrice('');
+        // setPipValuePerLot('0');
+        // setStandardLots('0');
+        // setTakeProfit('');
+        // setResult({ ep: '0', rrr: '0' });
 
         if (Platform.OS === 'android') {
           ToastAndroid.show('Fields cleared (saved data preserved).', ToastAndroid.SHORT);
@@ -624,7 +602,7 @@ const Deriv = () => {
 
         <View className="flex-row gap-4 mb-4" style={{ position: 'relative', zIndex: 10 }}>
           <View className="flex-1">
-            <CurrencyPickerModal
+            <CurrencyPickerModalDeriv
               accountCurrency={accountCurrency}
               setAccountCurrency={setAccountCurrency}
             />
@@ -814,13 +792,13 @@ const Deriv = () => {
 
                   {/* RRR */}
                   <View className="flex-row justify-between">
-                    <Text className="text-white font-rubik-medium">RRR:</Text>
+                    <Text className="text-white font-rubik-medium">R:R</Text>
                     <Text
                       className={`font-rubik-bold ${
-                        result.rrr === 'Error' ? 'text-red-500' : 'text-purple-400'
+                        result.rrr === 'Error' ? 'text-red-500' : 'text-primary-300'
                       }`}
                     >
-                      {result.rrr === 'Error' ? 'Error' : `1:${result.rrr}`}
+                      {result.rrr === 'Error' ? 'Error' : `1 : ${result.rrr}`}
                     </Text>
                   </View>
                 </View>

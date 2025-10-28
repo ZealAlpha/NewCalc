@@ -457,13 +457,13 @@ const Crypto = () => {
 
                 {/* RRR */}
                 <View className="flex-row justify-between">
-                  <Text className="text-white font-rubik-medium">RRR:</Text>
+                  <Text className="text-white font-rubik-medium">R:R</Text>
                   <Text
                     className={`font-rubik-bold ${
-                      result.rrr === 'Error' ? 'text-red-500' : 'text-purple-400'
+                      result.rrr === 'Error' ? 'text-red-500' : 'text-primary-300'
                     }`}
                   >
-                    {result.rrr === 'Error' ? result.rrr : `1:${result.rrr}`}
+                    {result.rrr === 'Error' ? result.rrr : `1 : ${result.rrr}`}
                   </Text>
                 </View>
               </View>

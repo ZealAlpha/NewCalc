@@ -27,7 +27,9 @@ type CurrencyItem = {
 
 export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fetchExchangeRate }: Props) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'Volatility' | 'Boom & Crash' | 'Jump Indices' | 'Step Index' | 'Hybrid Indices' | 'Others'>('Volatility');
+  const [activeTab, setActiveTab] = useState<
+    'All' | 'Volatility' | 'Boom & Crash' | 'Jump Indices' | 'Step Index' | 'Hybrid Indices' | 'Others'
+  >('All');
   const [searchTerm, setSearchTerm] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
 
@@ -35,6 +37,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
     setCurrencyPair(item.value);
     fetchExchangeRate(item.value);
     setModalVisible(false);
+    setSearchTerm('');
   };
 
   const toggleFavorite = async (value: string) => {
@@ -173,14 +176,20 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         return jumpPairs;
       case 'Step Index':
         return stepIndexPairs;
-        case 'Hybrid Indices':
-          return hybridPairs;
-          case 'Others':
-            return otherPairs
+      case 'Hybrid Indices':
+        return hybridPairs;
+      case 'Others':
+        return otherPairs;
+      case 'All':
+        // Merge all arrays into one
+        return Object.entries(allData).flatMap(([category, items]) =>
+          items.map(item => ({ ...item, category }))
+        );
       default:
         return [];
     }
   };
+
 
   // Updated filtering logic to search across all tabs
   const getFilteredItems = (): CurrencyItem[] => {
@@ -224,7 +233,8 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
               {/* Tabs */}
               <View className="flex-row justify-around mb-4">
                 <ScrollView horizontal showsHorizontalScrollIndicator={true} className="mb-4">
-                  {['Volatility',
+                  {['All',
+                    'Volatility',
                     'Boom & Crash',
                     'Jump Indices',
                     'Step Index',

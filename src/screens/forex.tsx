@@ -959,8 +959,8 @@ const Forex = () => {
         <View className="mt-4 w-full bg-secondary-100 border border-white rounded-2xl overflow-hidden mb-2">
 
           {/* Units Row */}
-          <View className="flex-row items-center justify-between border-b border-white px-4 py-3">
-            <Text className="text-white font-rubik-medium">Standard Lots:</Text>
+          <View className="flex-row items-center justify-center border-b border-white px-4 py-3">
+            <Text className="text-white font-rubik-bold mr-2">Standard Lots:</Text>
             <Text className="text-white font-rubik-medium">{standardLots}</Text>
           </View>
 
@@ -988,18 +988,18 @@ const Forex = () => {
             <View className="flex-row">
               {/* Micro Lots */}
               <View className="w-1/2 border-r border-white px-4 py-3 flex-row items-center justify-between">
-                <Text className="text-white font-rubik-medium">Micro Lots:</Text>
-                <Text className="text-white font-rubik-medium">{microLots}</Text>
-              </View>
-
-              {/* Pip Value */}
-              <View className="w-1/2 px-4 py-3 flex-row items-center justify-between">
                 <Text className="text-white font-rubik-medium">Pip Value:</Text>
                 <Text className="text-white font-rubik-medium">
                   {pipValuePerLot
                     ? `${getCurrencySymbol(accountCurrency)}${pipValuePerLot}`
                     : `${getCurrencySymbol(accountCurrency)}0`}
                 </Text>
+              </View>
+
+              {/* Pip Value */}
+              <View className="w-1/2 px-4 py-3 flex-row items-center justify-between">
+                <Text className="text-white font-rubik-medium">Micro Lots:</Text>
+                <Text className="text-white font-rubik-medium">{microLots}</Text>
               </View>
             </View>
 
@@ -1052,15 +1052,15 @@ const Forex = () => {
                 {/* Risk */}
                 <View className="flex-row items-center justify-between border-b border-white pb-3 mb-3">
                   <Text className="text-white font-rubik-medium">Risk:</Text>
-                  <Text className="text-red-400 font-rubik-medium">
+                  <Text className="text-red-900 font-rubik-medium">
                     {riskAmount || '0'}
                   </Text>
                 </View>
 
                 {/* RRR */}
                 <View className="flex-row items-center justify-between">
-                  <Text className="text-white font-rubik-medium">RRR:</Text>
-                  <Text className="text-purple-600 font-rubik-medium">{`1:${rrr}`}</Text>
+                  <Text className="text-white font-rubik-medium">R:R</Text>
+                  <Text className="text-primary-300 font-rubik-medium">{`1 : ${rrr}`}</Text>
                 </View>
               </View>
             </View>

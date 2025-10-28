@@ -21,29 +21,6 @@ export default function CurrencyPickerModal({ accountCurrency, setAccountCurrenc
 
     const currencyItems: CurrencyItem[] = [
         { label: 'USD', value: 'USD' },
-        { label: 'EUR', value: 'EUR' },
-        { label: 'GBP', value: 'GBP' },
-        { label: 'JPY', value: 'JPY' },
-        { label: 'CHF', value: 'CHF' },
-        { label: 'CAD', value: 'CAD' },
-        { label: 'AUD', value: 'AUD' },
-        { label: 'NZD', value: 'NZD' },
-        { label: 'CNY', value: 'CNY' },
-        // { label: 'CNH', value: 'CNH' },
-        // { label: 'CZK', value: 'CZK' },
-        // { label: 'DKK', value: 'DKK' },
-        // { label: 'HKD', value: 'HKD' },
-        // { label: 'KRW', value: 'KRW' },
-        // { label: 'KWD', value: 'KWD' },
-        // { label: 'INR', value: 'INR' },
-        // { label: 'MXN', value: 'MXN' },
-        // { label: 'NOK', value: 'NOK' },
-        // { label: 'PLN', value: 'PLN' },
-        // { label: 'RUB', value: 'RUB' },
-        // { label: 'SEK', value: 'SEK' },
-        // { label: 'SGD', value: 'SGD' },
-        // { label: 'TRY', value: 'TRY' },
-        { label: 'ZAR', value: 'ZAR' },
     ];
 
     const filteredItems = currencyItems.filter(item =>
@@ -53,7 +30,6 @@ export default function CurrencyPickerModal({ accountCurrency, setAccountCurrenc
     const handleSelect = (item: CurrencyItem) => {
         setAccountCurrency(item.value);
         setModalVisible(false);
-        setSearchTerm('');
     };
 
     return (
