@@ -270,6 +270,7 @@ const Forex = () => {
     const commoditiesBaseCurrency = currencyPair.substring(0, 2);
     const isJPYQuote = quoteCurrency === 'JPY';
     const isXAG = commoditiesBaseCurrency === 'SI' || currencyPair.startsWith('XAGUSD');
+    const isJP225 = commoditiesBaseCurrency === '^N225' || currencyPair.startsWith('JP225');
     const isJPYBase = baseCurrency === 'JPY';
     const isNG = currencyPair.startsWith('NGUSD');
     const isIndices = indicesPairs.includes(currencyPair);
@@ -381,6 +382,7 @@ const Forex = () => {
     const isNG = commoditiesBaseCurrency === 'NG';
     const isDoge = currencyPair.startsWith('DOG');
     const tp = parseFloat(takeProfitPrice) || 0;
+    const isJP225 = commoditiesBaseCurrency === '^N225' || currencyPair.startsWith('JP225');
 
     const isIndices = ['^DJI', '^SPX', '^AXJO', '^N225', '^FTSE', '^IBEX', '^HSI', '^XNDX', '^GDAXI', '^FCHI']
       .some(sym => currencyPair.startsWith(sym));
