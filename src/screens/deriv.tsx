@@ -120,14 +120,11 @@ const Deriv = () => {
   const [standardLots, setStandardLots] = useState('0');
   const [loading, setLoading] = useState(false);
   const [subscriptionId, setSubscriptionId] = useState<string | null>(null);
-<<<<<<< HEAD
   const [isCalculated, setIsCalculated] = useState(false);
   const [takeProfit, setTakeProfit] = useState('');
   const [result, setResult] = useState({ ep: '0', rrr: '0' });
 
 
-=======
->>>>>>> parent of 4973ed4 (Latest October)
 
   // Helper function to get instrument data
   const getInstrument = (currencyPair: string) => {
@@ -470,7 +467,6 @@ const Deriv = () => {
     if (stopLossPrice) setStopLossTick('');
   };
 
-<<<<<<< HEAD
   // 🔁 Auto-clear EP/RRR when Entry or Stop Loss changes
   useEffect(() => {
     // Only clear if there’s a current result showing
@@ -556,7 +552,7 @@ const Deriv = () => {
       lastPress.current = now;
     }
   };
-=======
+
   useEffect(() => {
     calculatePosition();
   }, [
@@ -582,7 +578,6 @@ const Deriv = () => {
     setCurrencyPair('R_10');
     setAccountCurrency('USD');
   }, []);
->>>>>>> parent of 4973ed4 (Latest October)
 
   // Clean up the WebSocket connection when the component unmounts
   useEffect(() => {
@@ -746,7 +741,6 @@ const Deriv = () => {
           ))}
         </View>
 
-<<<<<<< HEAD
         {showRiskRewardSection && (
         <View className="mt-4 w-full bg-black-200 border border-white rounded-2xl overflow-hidden mb-2">
           {/* Table Grid */}
@@ -823,8 +817,6 @@ const Deriv = () => {
           </View>
         </View>
         )}
-=======
->>>>>>> parent of 4973ed4 (Latest October)
       </ScrollView>
     </SafeAreaView>
   );
