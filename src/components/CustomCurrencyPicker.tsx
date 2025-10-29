@@ -174,65 +174,65 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         },
     ];
 
-    const indicesPairs: CurrencyItem[] = [
-        {
-            label: 'US30',
-            value: '^DJI',
-            description: "Dow Jones Industrial Average"
-        },
-        {
-            label: 'SP500',
-            value: '^SPX',
-            description: "S&P 500 Index"
-        },
-        {
-            label: 'AUS200',
-            value: '^AXJO',
-            description: "S&P/ASX 200 Index"
-        },
-        {
-            label: 'JP225',
-            value: '^N225',
-            description: "Neikkei 225 Index"
-        },
-        {
-            label: 'UK100',
-            value: '^FTSE',
-            description: "FTSE 100 Index"
-        },
-        {
-            label: 'IBEX35',
-            value: '^IBEX',
-            description: " IBEX 35 Index"
-        },
-        {
-            label: 'HSI50',
-            value: '^HSI',
-            description: "Hang Seng Index"
-        },
-        {
-            label: 'NAS100',
-            value: '^XNDX',
-            description: "NASDAQ 100 Index"
-        },
-        {
-            label: 'GDAXI',
-            value: '^GDAXI',
-            description: "Dax 30 Index"
-        },
-        {
-            label: 'FCHI40',
-            value: '^FCHI',
-            description: "CAC 40 Index"
-        },
-    ];
+    // const indicesPairs: CurrencyItem[] = [
+    //     {
+    //         label: 'US30',
+    //         value: '^DJI',
+    //         description: "Dow Jones Industrial Average"
+    //     },
+    //     {
+    //         label: 'SP500',
+    //         value: '^SPX',
+    //         description: "S&P 500 Index"
+    //     },
+    //     {
+    //         label: 'AUS200',
+    //         value: '^AXJO',
+    //         description: "S&P/ASX 200 Index"
+    //     },
+    //     {
+    //         label: 'JP225',
+    //         value: '^N225',
+    //         description: "Neikkei 225 Index"
+    //     },
+    //     {
+    //         label: 'UK100',
+    //         value: '^FTSE',
+    //         description: "FTSE 100 Index"
+    //     },
+    //     {
+    //         label: 'IBEX35',
+    //         value: '^IBEX',
+    //         description: " IBEX 35 Index"
+    //     },
+    //     {
+    //         label: 'HSI50',
+    //         value: '^HSI',
+    //         description: "Hang Seng Index"
+    //     },
+    //     {
+    //         label: 'NAS100',
+    //         value: '^XNDX',
+    //         description: "NASDAQ 100 Index"
+    //     },
+    //     {
+    //         label: 'GDAXI',
+    //         value: '^GDAXI',
+    //         description: "Dax 30 Index"
+    //     },
+    //     {
+    //         label: 'FCHI40',
+    //         value: '^FCHI',
+    //         description: "CAC 40 Index"
+    //     },
+    // ];
 
     // Combined data with category tags
     const allData = {
         'Forex': forexPairs,
         'Crypto': cryptoPairs,
         'Commodities': commoditiesPairs,
-        'Indices': indicesPairs
+        // 'Indices': indicesPairs
     };
 
     // Helper function to get display label for selected currency pair
@@ -247,6 +247,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         return value; // fallback to value if not found
     };
 
+<<<<<<< HEAD
   const getActivePairs = (): CurrencyItem[] => {
     switch (activeTab) {
       case 'All':
@@ -265,6 +266,22 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
         return [];
     }
   };
+=======
+    const getActivePairs = (): CurrencyItem[] => {
+        switch (activeTab) {
+            case 'Forex':
+                return forexPairs;
+            case 'Crypto':
+                return cryptoPairs;
+            case 'Commodities':
+                return commoditiesPairs;
+            // case 'Indices':
+            //     return indicesPairs;
+             default:
+                return [];
+        }
+    };
+>>>>>>> parent of 4973ed4 (Latest October)
 
     // Updated filtering logic to search across all tabs
     const getFilteredItems = (): CurrencyItem[] => {
@@ -308,12 +325,17 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                         <View className="w-11/12 bg-white dark:bg-black-300 p-4 rounded-xl max-h-[80%]">
                             {/* Tabs */}
                             <View className="flex-row justify-around mb-4">
+<<<<<<< HEAD
                                 <ScrollView horizontal showsHorizontalScrollIndicator={true} className="mb-4">
                                     {['All',
                                       'Forex',
+=======
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+                                    {['Forex',
+>>>>>>> parent of 4973ed4 (Latest October)
                                       'Crypto',
                                       'Commodities',
-                                      'Indices'
+                                      // 'Indices'
                                     ].map(tab => (
                                         <TouchableOpacity
                                             key={tab}

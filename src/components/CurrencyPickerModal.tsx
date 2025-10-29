@@ -21,14 +21,14 @@ export default function CurrencyPickerModal({ accountCurrency, setAccountCurrenc
 
     const currencyItems: CurrencyItem[] = [
         { label: 'USD', value: 'USD' },
-        { label: 'EUR', value: 'EUR' },
-        { label: 'GBP', value: 'GBP' },
-        { label: 'JPY', value: 'JPY' },
-        { label: 'CHF', value: 'CHF' },
-        { label: 'CAD', value: 'CAD' },
-        { label: 'AUD', value: 'AUD' },
-        { label: 'NZD', value: 'NZD' },
-        { label: 'CNY', value: 'CNY' },
+        // { label: 'EUR', value: 'EUR' },
+        // { label: 'GBP', value: 'GBP' },
+        // { label: 'JPY', value: 'JPY' },
+        // { label: 'CHF', value: 'CHF' },
+        // { label: 'CAD', value: 'CAD' },
+        // { label: 'AUD', value: 'AUD' },
+        // { label: 'NZD', value: 'NZD' },
+        // { label: 'CNY', value: 'CNY' },
         // { label: 'CNH', value: 'CNH' },
         // { label: 'CZK', value: 'CZK' },
         // { label: 'DKK', value: 'DKK' },
@@ -43,7 +43,7 @@ export default function CurrencyPickerModal({ accountCurrency, setAccountCurrenc
         // { label: 'SEK', value: 'SEK' },
         // { label: 'SGD', value: 'SGD' },
         // { label: 'TRY', value: 'TRY' },
-        { label: 'ZAR', value: 'ZAR' },
+        // { label: 'ZAR', value: 'ZAR' },
     ];
 
     const filteredItems = currencyItems.filter(item =>
