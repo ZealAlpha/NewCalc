@@ -1656,9 +1656,7 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - SocketRocket
-  - react-native-netinfo (11.4.1):
-    - React-Core
-  - react-native-safe-area-context (5.6.1):
+  - react-native-safe-area-context (5.6.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -1677,8 +1675,8 @@ PODS:
     - React-hermes
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.6.1)
-    - react-native-safe-area-context/fabric (= 5.6.1)
+    - react-native-safe-area-context/common (= 5.6.0)
+    - react-native-safe-area-context/fabric (= 5.6.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1689,7 +1687,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/common (5.6.1):
+  - react-native-safe-area-context/common (5.6.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -1718,7 +1716,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/fabric (5.6.1):
+  - react-native-safe-area-context/fabric (5.6.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2341,9 +2339,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNRate (1.2.12):
-    - React-Core
-  - RNReanimated (4.1.0):
+  - RNReanimated (4.0.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2370,11 +2366,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 4.1.0)
+    - RNReanimated/reanimated (= 4.0.2)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated (4.1.0):
+  - RNReanimated/reanimated (4.0.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2401,11 +2397,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 4.1.0)
+    - RNReanimated/reanimated/apple (= 4.0.2)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated/apple (4.1.0):
+  - RNReanimated/reanimated/apple (4.0.2):
     - boost
     - DoubleConversion
     - fast_float
@@ -2435,7 +2431,7 @@ PODS:
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNScreens (4.16.0):
+  - RNScreens (4.13.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2463,10 +2459,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.16.0)
+    - RNScreens/common (= 4.13.1)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.16.0):
+  - RNScreens/common (4.13.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2496,7 +2492,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNSVG (15.13.0):
+  - RNSVG (15.12.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2523,10 +2519,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNSVG/common (= 15.13.0)
+    - RNSVG/common (= 15.12.1)
     - SocketRocket
     - Yoga
-  - RNSVG/common (15.13.0):
+  - RNSVG/common (15.12.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2584,7 +2580,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNWorklets (0.5.1):
+  - RNWorklets (0.4.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2611,10 +2607,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets (= 0.5.1)
+    - RNWorklets/worklets (= 0.4.1)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets (0.5.1):
+  - RNWorklets/worklets (0.4.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2641,10 +2637,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNWorklets/worklets/apple (= 0.5.1)
+    - RNWorklets/worklets/apple (= 0.4.1)
     - SocketRocket
     - Yoga
-  - RNWorklets/worklets/apple (0.5.1):
+  - RNWorklets/worklets/apple (0.4.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2720,7 +2716,6 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
-  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-vector-icons-evil-icons (from `../node_modules/@react-native-vector-icons/evil-icons`)"
   - "react-native-vector-icons-fontawesome (from `../node_modules/@react-native-vector-icons/fontawesome`)"
@@ -2760,7 +2755,6 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - RNRate (from `../node_modules/react-native-rate`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
@@ -2860,8 +2854,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
-  react-native-netinfo:
-    :path: "../node_modules/@react-native-community/netinfo"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-vector-icons-evil-icons:
@@ -2940,8 +2932,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-clipboard/clipboard"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNRate:
-    :path: "../node_modules/react-native-rate"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2999,8 +2989,7 @@ SPEC CHECKSUMS:
   React-logger: 984ebd897afad067555d081deaf03f57c4315723
   React-Mapbuffer: 0c045c844ce6d85cde53e85ab163294c6adad349
   React-microtasksnativemodule: d9499269ad1f484ae71319bac1d9231447f2094e
-  react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
-  react-native-safe-area-context: 8ed800930eb7d0b6651218f69656e823d37b6ef7
+  react-native-safe-area-context: b84e3cefd1ec3d38aa1d8bfbc2a15400ffe05181
   react-native-vector-icons-evil-icons: 74d1fe2b104d1b4286359313713c7a4a9dcef1be
   react-native-vector-icons-fontawesome: c41fd08991989b71fe79c68ebb3ee30ac221178e
   react-native-vector-icons-fontawesome6: 1b667969bef2f430d1d7515163b980b856f58670
@@ -3039,16 +3028,15 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 1f04c8d56558e533277beda29187f571cf7eecb2
   RNCClipboard: b228d492733d66e0126e18ce66c6d2f90bacc7e5
   RNGestureHandler: db29d3e7edf41a11d133cc3ffd4029762376ed1a
-  RNRate: 7641919330e0d6688ad885a985b4bd697ed7d14c
-  RNReanimated: 5479b2116dcbbd2ba1eefb5561d5b322da306884
-  RNScreens: 3fc29af06302e1f1c18a7829fe57cbc2c0259912
-  RNSVG: c015c3736ca7176521d82b7c433dc69c8133d1ab
+  RNReanimated: e8c97df80681b4a8c1737e3526f690db141156f7
+  RNScreens: c63849403489bd068ea160f276fbc8416f19f2f7
+  RNSVG: d407e5f2ede12bbcd92e4d23a405ad5a5f7294a3
   RNVectorIcons: be4d047a76ad307ffe54732208fb0498fcb8477f
-  RNWorklets: 6f677514fddcf3e4aaf0b4761db543e5e32d75e1
+  RNWorklets: 18d2a9a10588e4d51f42116f19e650d296ab8dbc
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SSZipArchive: c69881e8ac5521f0e622291387add5f60f30f3c4
   Yoga: daa1e4de4b971b977b23bc842aaa3e135324f1f3
 
 PODFILE CHECKSUM: b4cfe6bdab6ae204dea4d57aef760c74ab2bd385
 
-COCOAPODS: 1.16.2
+COCOAPODS: 1.15.2

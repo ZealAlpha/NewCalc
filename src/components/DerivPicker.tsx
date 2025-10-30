@@ -232,9 +232,14 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
             <View className="w-11/12 bg-white dark:bg-black-300 p-4 rounded-xl max-h-[80%]">
               {/* Tabs */}
               <View className="flex-row justify-around mb-4">
+<<<<<<< HEAD
                 <ScrollView horizontal showsHorizontalScrollIndicator={true} className="mb-4">
                   {['All',
                     'Volatility',
+=======
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-4">
+                  {['Volatility',
+>>>>>>> parent of 4973ed4 (Latest October)
                     'Boom & Crash',
                     'Jump Indices',
                     'Step Index',

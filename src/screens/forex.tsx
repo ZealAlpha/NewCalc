@@ -361,7 +361,7 @@ const Forex = () => {
       } else {
         // quoteToAccountRate is USDGBP (e.g., 0.749), which is correct
         // $1 × 0.749 = £0.749
-        pipValue = parseFloat(quoteToAccountRate);
+        pipValue = 1 * parseFloat(quoteToAccountRate);
       }
     } else {
       // Existing forex logic
@@ -727,7 +727,7 @@ const Forex = () => {
       }
     };
     saveUserInputs();
-  }, [accountBalance, riskPercentage, riskAmount]);
+  }, [accountBalance, riskPercentage]);
 
   // ♻️ Load saved Account Balance and Risk Percentage on startup
   useEffect(() => {

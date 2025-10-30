@@ -5,9 +5,12 @@ import { createStackNavigator } from '@react-navigation/stack';
 import './global.css';
 import Premium from './src/screens/premium';
 import CodePush from "@code-push-next/react-native-code-push";
+<<<<<<< HEAD
 import { useAppRating } from './src/hooks/useAppRating';
 import { RatingModal } from './src/components/RatingModal';
 import { SettingsProvider } from './src/context/SettingsContext';
+=======
+>>>>>>> parent of 4973ed4 (Latest October)
 
 // Screens
 import Index from './src/screens/index';
@@ -20,31 +23,11 @@ import _layout from './src/screens/_layout';
 const Stack = createStackNavigator();
 
 export default function App() {
-  const {
-    showRatingModal,
-    initializeRatingSystem,
-    showRatingPrompt,
-    handleRateNow,
-    handleLater,
-    handleNever
-  } = useAppRating();
   useEffect(() => {
     CodePush.sync({
       installMode: CodePush.InstallMode.IMMEDIATE,
       updateDialog: true,
     });
-  }, []);
-
-  useEffect(() => {
-    // Initialize the rating system when app starts
-    initializeRatingSystem();
-
-    // Show rating prompt after a short delay (to avoid interrupting initial load)
-    const timer = setTimeout(() => {
-      showRatingPrompt();
-    }, 3000); // 3 seconds after app loads
-
-    return () => clearTimeout(timer);
   }, []);
   // const [showBanner, setShowBanner] = useState(false);
 
@@ -113,13 +96,6 @@ export default function App() {
         {/*    requestOptions={{ requestNonPersonalizedAdsOnly: true }}*/}
         {/*  />*/}
         {/*)}*/}
-        <RatingModal
-          visible={showRatingModal}
-          onRateNow={handleRateNow}
-          onLater={handleLater}
-          onNever={handleNever}
-          appName="FX Crypto Calculator" // Replace with your actual app name
-        />
       </View>
     </>
   );

@@ -146,10 +146,10 @@ const Deriv = () => {
   };
 
   // Helper function to floor to specific decimals
-  const roundToDecimals = (value: number, decimals: number) => {
+  const floorToDecimals = (value: number, decimals: number) => {
     if (!isFinite(value)) return 0;
     const factor = Math.pow(10, decimals);
-    return Math.round(value * factor) / factor;
+    return Math.floor(value * factor + 1e-9) / factor;
   };
 
   const { showRiskRewardSection } = useSettings();
@@ -193,14 +193,14 @@ const Deriv = () => {
     ws.current = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=96246');
 
     ws.current.onopen = () => {
-      // console.log('Deriv WebSocket connected for:', pair);
+      console.log('Deriv WebSocket connected for:', pair);
       const subscribeMessage = {
         ticks: pair,
         subscribe: 1
       };
       if (ws.current) {
         ws.current.send(JSON.stringify(subscribeMessage));
-        // console.log('Subscribing to:', pair);
+        console.log('Subscribing to:', pair);
       }
     };
 
@@ -235,7 +235,7 @@ const Deriv = () => {
     };
 
     ws.current.onclose = () => {
-      // console.log('Deriv WebSocket closed for:', pair);
+      console.log('Deriv WebSocket closed for:', pair);
       setLoading(false);
       setSubscriptionId(null);
     };
@@ -318,7 +318,7 @@ const Deriv = () => {
       let lots = calculatedRiskAmount / (calculatedSlTicks * TV);
 
       const lotDecimals = decimalsFromMinLot(minLot);
-      lots = roundToDecimals(lots, lotDecimals);
+      lots = floorToDecimals(lots, lotDecimals);
 
       if (lots > 0 && lots < minLot) {
         lots = minLot;
@@ -333,14 +333,7 @@ const Deriv = () => {
     // Update tick value display
     const decimals = decimalsFromMinLot(minLot);
     setPipValuePerLot(TV.toFixed(Math.max(decimals, 2)));
-    setIsCalculated(true);
   }, [accountBalance, riskPercentage, riskAmount, stopLossTick, entryPrice, stopLossPrice, currencyPair]);
-
-  const resetOutputs = () => {
-    setStandardLots('0');
-    setPipValuePerLot('0');
-    setIsCalculated(false);
-  };
 
   const formatWithCommas = (value: string) => {
     // Remove all non-numeric except decimal
@@ -357,17 +350,9 @@ const Deriv = () => {
     setAccountBalance(formatted);
   };
 
-  const handleRiskPercentageChange = (value: string) => {
+  const handleRiskPercentageChange = (value: React.SetStateAction<string>) => {
     setRiskPercentage(value);
-    if (accountBalance && value) {
-      const ab = toNumeric(accountBalance) || 0;
-      const rPct = parseFloat(value.replace('%', '')) || 0;
-      const calculatedRiskAmount = (ab * rPct) / 100;
-      setRiskAmount(calculatedRiskAmount.toFixed(2));
-    } else {
-      setRiskAmount('');
-    }
-    resetOutputs(); // clear lot size outputs
+    setRiskAmount('');
   };
 
   const handleRiskAmountChange = (value: React.SetStateAction<string>) => {
@@ -379,18 +364,6 @@ const Deriv = () => {
     const formatted = formatWithCommas(value);
     setStopLossPrice(formatted);
     setStopLossTick('');
-    resetOutputs();
-
-    const ep = toNumeric(entryPrice) || 0;
-    const slPrice = toNumeric(value) || 0;
-    const instrument = getInstrument(currencyPair);
-    const { TS } = instrument;
-
-    if (ep > 0 && slPrice > 0 && TS > 0) {
-      const priceDiff = Math.abs(ep - slPrice);
-      const calculatedSlTicks = Math.round(priceDiff / TS);
-      setStopLossTick(calculatedSlTicks.toString());
-    }
   };
 
   // 💾 Persist Account Balance and Risk Percentage
@@ -492,7 +465,6 @@ const Deriv = () => {
     const formatted = formatWithCommas(value);
     setEntryPrice(formatted);
     if (stopLossPrice) setStopLossTick('');
-    resetOutputs();
   };
 
   // 🔁 Auto-clear EP/RRR when Entry or Stop Loss changes
@@ -581,6 +553,32 @@ const Deriv = () => {
     }
   };
 
+  useEffect(() => {
+    calculatePosition();
+  }, [
+    accountBalance,
+    riskPercentage,
+    riskAmount,
+    stopLossTick,
+    entryPrice,
+    stopLossPrice,
+    currencyPair,
+    calculatePosition
+  ]);
+
+  const handleReset = useCallback(() => {
+    setAccountBalance('');
+    setRiskPercentage('');
+    setRiskAmount('');
+    setStopLossTick('');
+    setStopLossPrice('');
+    setEntryPrice('');
+    setPipValuePerLot('0');
+    setStandardLots('0');
+    setCurrencyPair('R_10');
+    setAccountCurrency('USD');
+  }, []);
+
   // Clean up the WebSocket connection when the component unmounts
   useEffect(() => {
     return () => {
@@ -651,7 +649,7 @@ const Deriv = () => {
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
             <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk Amount</Text>
-            <EnhancedTextInput
+            <TextInput
               className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
               placeholder="Risk Amount"
               placeholderTextColor="#374151"
@@ -663,7 +661,7 @@ const Deriv = () => {
 
           <View className="flex-1">
             <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss Tick</Text>
-            <EnhancedTextInput
+            <TextInput
               className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
               placeholder="Stop Loss Ticks"
               placeholderTextColor="#374151"
@@ -678,7 +676,7 @@ const Deriv = () => {
           <View className="flex-1">
             <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Entry Price</Text>
             <View className="relative">
-              <EnhancedTextInput
+              <TextInput
                 value={entryPrice}
                 onChangeText={handleEntryPriceChange}
                 keyboardType="decimal-pad"
@@ -727,9 +725,9 @@ const Deriv = () => {
 
         <View className="mt-4 mb-1 w-full bg-red-600 border border-white rounded-2xl">
           {[
-            // { label: 'Risk Amount', value: riskAmount ? `${getCurrencySymbol(accountCurrency)}${riskAmount}` : `${getCurrencySymbol(accountCurrency)}0` },
-            { label: 'Lots', value: isCalculated ? standardLots : '0' },
-            { label: 'Tick Value', value: isCalculated ? `${getCurrencySymbol(accountCurrency)}${pipValuePerLot}` : `${getCurrencySymbol(accountCurrency)}0` },
+            { label: 'Risk Amount', value: riskAmount ? `${getCurrencySymbol(accountCurrency)}${riskAmount}` : `${getCurrencySymbol(accountCurrency)}0` },
+            { label: 'Lots', value: standardLots },
+            { label: 'Tick Value', value: pipValuePerLot ? `${getCurrencySymbol(accountCurrency)}${pipValuePerLot}` : `${getCurrencySymbol(accountCurrency)}0` },
           ].map((item, index, arr) => (
             <View
               key={index}
