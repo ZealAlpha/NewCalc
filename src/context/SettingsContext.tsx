@@ -4,12 +4,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type SettingsContextType = {
   showRiskRewardSection: boolean;
   setShowRiskRewardSection: (value: boolean) => void;
+
+  isAdvancedMode: boolean;
+  setIsAdvancedMode: (value: boolean) => void;
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [showRiskRewardSection, setShowRiskRewardSection] = useState(true);
+  const [isAdvancedMode, setIsAdvancedMode] = useState(true);
 
   // Load settings on mount
   useEffect(() => {
@@ -41,6 +45,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       value={{
         showRiskRewardSection,
         setShowRiskRewardSection: updateShowRiskRewardSection,
+        isAdvancedMode,
+        setIsAdvancedMode,
       }}
     >
       {children}

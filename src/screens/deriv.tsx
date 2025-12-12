@@ -1,5 +1,5 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { View, Text, TextInput, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import DerivPicker from '../components/DerivPicker.tsx';
@@ -8,6 +8,7 @@ import EnhancedTextInput from "../components/EnhancedTextInput.tsx";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ToastAndroid, Alert, Platform } from 'react-native';
 import { useSettings } from '../context/SettingsContext.tsx';
+import { ThemeContext } from '../components/ThemeContext';
 
 // Comprehensive instruments data with tick size (TS), tick value (TV), and minimum lot
 const INSTRUMENTS = {
@@ -107,6 +108,8 @@ const INSTRUMENTS = {
 };
 
 const Deriv = () => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const ws = useRef<WebSocket | null>(null);
   const [currencyPair, setCurrencyPair] = useState('R_10');
   const [accountCurrency, setAccountCurrency] = useState('USD');
@@ -123,6 +126,7 @@ const Deriv = () => {
   const [isCalculated, setIsCalculated] = useState(false);
   const [takeProfit, setTakeProfit] = useState('');
   const [result, setResult] = useState({ ep: '0', rrr: '0' });
+  const { isAdvancedMode } = useSettings();
 
 
 
@@ -366,7 +370,7 @@ const Deriv = () => {
     setStopLossTick('');
   };
 
-  // 💾 Persist Account Balance and Risk Percentage
+  // 💾 Persist Account Balance and Risk Percentage and Risk Amount
   useEffect(() => {
     const saveUserInputs = async () => {
       try {
@@ -376,12 +380,15 @@ const Deriv = () => {
         if (riskPercentage) {
           await AsyncStorage.setItem('riskPercentage', riskPercentage);
         }
+        if (riskAmount) {
+          await AsyncStorage.setItem('riskAmount', riskAmount);
+        }
       } catch (error) {
         console.warn('Error saving data to storage:', error);
       }
     };
     saveUserInputs();
-  }, [accountBalance, riskPercentage]);
+  }, [accountBalance, riskAmount, riskPercentage]);
 
 
   // Calculate Take Profit
@@ -394,12 +401,16 @@ const Deriv = () => {
       try {
         const savedBalance = await AsyncStorage.getItem('accountBalance');
         const savedRisk = await AsyncStorage.getItem('riskPercentage');
+        const savedRiskAmount = await AsyncStorage.getItem('riskAmount');
 
         if (savedBalance !== null) {
           setAccountBalance(savedBalance);
         }
         if (savedRisk !== null) {
           setRiskPercentage(savedRisk);
+        }
+        if (savedRiskAmount) {
+          setRiskAmount(savedRiskAmount);
         }
       } catch (error) {
         console.warn('Error loading data from storage:', error);
@@ -421,20 +432,28 @@ const Deriv = () => {
   };
 
   const calculateTakeProfit = (tpValue: string) => {
-    const TP = parseFloat(tpValue);
+    const TP = toNumeric(tpValue);
     const E = parseFloat(entryPrice);
-    const SL = parseFloat(stopLossPrice);
+    const SL = toNumeric(stopLossPrice);
     const C = parseFloat(accountBalance.replace(/,/g, ''));
     const R = parseFloat(riskPercentage.replace('%', '')) / 100;
+    const SLT = parseFloat(stopLossTick);
 
-    if (!C || !R || !E || !SL || !TP) {
+    if (!C || !R || !E || !SL || !TP || !SLT) {
       setResult({ ep: '0', rrr: '0' });
       return;
     }
 
+    console.log('Input values:', {
+      tpValue,
+      entryPrice,
+      stopLossPrice,
+      TP, E, SL
+    });
+
     // Ensure Entry Price is between SL and TP
     const isValid =
-      (E > SL && E < TP) || (E < SL && E > TP);
+      (SL < E && E < TP) || (TP < E && E < SL);
 
     if (!isValid) {
       setResult({ ep: 'Error', rrr: 'Error' });
@@ -511,12 +530,13 @@ const Deriv = () => {
           await AsyncStorage.multiRemove(['accountBalance', 'riskPercentage']);
           setAccountBalance('');
           setRiskPercentage('');
+          setRiskAmount('');
           setEntryPrice('');
-          setStopLossPrice('');
-          setEntryPrice('');
+          setStopLossTick('');
           setPipValuePerLot('0');
           setStandardLots('0');
           setTakeProfit('');
+          setStopLossPrice('')
           setResult({ ep: '0', rrr: '0' });
 
           if (Platform.OS === 'android') {
@@ -535,12 +555,12 @@ const Deriv = () => {
       singlePressTimer.current = setTimeout(() => {
         // Only clear form values (keep AsyncStorage)
         setEntryPrice('');
-        setStopLossPrice('');
-        // setEntryPrice('');
-        // setPipValuePerLot('0');
-        // setStandardLots('0');
-        // setTakeProfit('');
-        // setResult({ ep: '0', rrr: '0' });
+        setStopLossTick('');
+        setPipValuePerLot('0');
+        setStandardLots('0');
+        setTakeProfit('');
+        setStopLossPrice('')
+        setResult({ ep: '0', rrr: '0' });
 
         if (Platform.OS === 'android') {
           ToastAndroid.show('Fields cleared (saved data preserved).', ToastAndroid.SHORT);
@@ -589,7 +609,8 @@ const Deriv = () => {
   }, []);
 
   return (
-    <SafeAreaView className="bg-white dark:bg-black-300 h-full p-4">
+    <SafeAreaProvider>
+    <SafeAreaView className={`p-4 w-full h-full ${isDark ? 'bg-black-300' : 'bg-white'}`}>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -617,21 +638,28 @@ const Deriv = () => {
 
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Account Balance</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Account Balance</Text>
             <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md dark:text-white text-black"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Account Balance"
               placeholderTextColor="#374151"
               value={accountBalance}
               onChangeText={handleAccountBalanceChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk %</Text>
+            <View className="flex-row justify-between mb-1">
+              <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Risk %</Text>
+              {!isAdvancedMode && (
+              <Text className={`text-sm font-rubik mb-1 mr-9 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                {riskAmount !== '0' ? `$${riskAmount}` : ''}
+              </Text>
+              )}
+            </View>
             <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Risk in %"
               placeholderTextColor="#374151"
               value={riskPercentage}
@@ -641,47 +669,61 @@ const Deriv = () => {
                   setRiskPercentage(riskPercentage + '%');
                 }
               }}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
         </View>
 
+        {isAdvancedMode && (
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
+<<<<<<< Updated upstream
             <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk Amount</Text>
             <TextInput
               className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
+=======
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Risk Amount</Text>
+            <EnhancedTextInput
+              className={`p-4 border border-primary-100 text-center rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+>>>>>>> Stashed changes
               placeholder="Risk Amount"
               placeholderTextColor="#374151"
               value={riskAmount}
               onChangeText={handleRiskAmountChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
 
           <View className="flex-1">
+<<<<<<< Updated upstream
             <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss Tick</Text>
             <TextInput
               className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
+=======
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Stop Loss Tick</Text>
+            <EnhancedTextInput
+              className={`p-4 border border-primary-100 text-center rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+>>>>>>> Stashed changes
               placeholder="Stop Loss Ticks"
               placeholderTextColor="#374151"
               value={stopLossTick}
               onChangeText={handleStopLossPipsChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
         </View>
+        )}
 
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Entry Price</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Entry Price</Text>
             <View className="relative">
               <TextInput
                 value={entryPrice}
                 onChangeText={handleEntryPriceChange}
-                keyboardType="decimal-pad"
+                keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
                 placeholder="Auto-filled entry price"
-                className="p-4 pr-10 border border-primary-100 rounded-md text-black dark:text-white"
+                className={`p-4 pr-10 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               />
               <View className="absolute right-3 top-1/2 -translate-y-1/2">
                 {loading ? (
@@ -696,14 +738,14 @@ const Deriv = () => {
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss Price</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Stop Loss Price</Text>
             <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Stop Loss Price"
               placeholderTextColor="#374151"
               value={stopLossPrice}
               onChangeText={handleStopLossPriceChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
         </View>
@@ -757,7 +799,7 @@ const Deriv = () => {
                   setTakeProfit(value);
                   calculateTakeProfit(value);
                 }}
-                keyboardType="numeric"
+                keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
               />
             </View>
 
@@ -819,6 +861,7 @@ const Deriv = () => {
         )}
       </ScrollView>
     </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

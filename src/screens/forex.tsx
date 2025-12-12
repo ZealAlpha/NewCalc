@@ -1,5 +1,5 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import { View, Text, TextInput, ActivityIndicator, ScrollView, TouchableOpacity } from 'react-native';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import CustomCurrencyPicker from '../components/CustomCurrencyPicker.tsx';
@@ -9,14 +9,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRef } from 'react';
 import { ToastAndroid, Alert, Platform } from 'react-native';
 import { useSettings } from '../context/SettingsContext.tsx';
+import { ThemeContext } from '../components/ThemeContext';
 
 
 const Forex = () => {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [currencyPair, setCurrencyPair] = useState('EURUSD');
   const [, setIsCalculated] = useState(false);
   const [accountCurrencyOpen] = useState(false);
   const [accountCurrency, setAccountCurrency] = useState('USD');
   const [isEntryPriceManuallyEdited, setIsEntryPriceManuallyEdited] = useState(false);
+  const { isAdvancedMode } = useSettings();
 
   // Move indicesQuoteCurrencies outside of component or memoize it
   const indicesQuoteCurrencies = useMemo(() => ({
@@ -86,6 +90,7 @@ const Forex = () => {
   const [pipValuePerLot, setPipValuePerLot] = useState('0');
   const [units, setUnits] = useState('0');
   const [standardLots, setStandardLots] = useState('0');
+  const [newstandardLots, setNewstandardLots] = useState('0');
   const [miniLots, setMiniLots] = useState('0');
   const [microLots, setMicroLots] = useState('0');
   const [loading, setLoading] = useState(false);
@@ -306,7 +311,10 @@ const Forex = () => {
       console.log('Match?', accountCurrency === indexQuoteCurrency);
       if (accountCurrency === indexQuoteCurrency) {
         pipValue = 0.01;
+<<<<<<< Updated upstream
         console.log('✅ Same currency, pipValue = 0.01');
+=======
+>>>>>>> Stashed changes
       } else {
         const exchangeRate = IndicesExchangeRate ?? 1;
         pipValue = 0.01 / exchangeRate;
@@ -383,8 +391,16 @@ const Forex = () => {
     } else {
       setPipValuePerLot(pipValue.toFixed(4));
     }
+<<<<<<< Updated upstream
     // setPipValuePerLot(pipValue.toFixed(8));
+=======
+>>>>>>> Stashed changes
   }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate, IndicesExchangeRate, indicesQuoteCurrencies, indicesPairs, getQuoteCurrency]);
+
+  const toNumeric = (s: string) => {
+    const n = parseFloat(String(s).replace(/,/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  };
 
   const calculatePosition = useCallback(() => {
     const ab = parseFloat(accountBalance) || 0;
@@ -495,11 +511,13 @@ const Forex = () => {
       if (isDoge) {
         const standardLotsResult = baseLotsResult * 10;
         setStandardLots(standardLotsResult.toFixed(2));
+        setNewstandardLots(standardLotsResult.toFixed(1));
         setMiniLots((standardLotsResult * 10).toFixed(1));
         setMicroLots((standardLotsResult * 100).toFixed(0));
         setUnits(Math.round(baseLotsResult).toString());
       } else {
         setStandardLots(baseLotsResult.toFixed(3));
+        setNewstandardLots(baseLotsResult.toFixed(2));
         setMiniLots((baseLotsResult * 10).toFixed(2));
         setMicroLots((baseLotsResult * 100).toFixed(1));
 
@@ -515,7 +533,7 @@ const Forex = () => {
     } else {
       setUnits('0');
       setStandardLots('0');
-      setMiniLots('0');
+      setNewstandardLots('0');
       setMicroLots('0');
     }
     setIsCalculated(true);
@@ -536,14 +554,32 @@ const Forex = () => {
   const resetOutputs = () => {
     setUnits('0');
     setStandardLots('0');
+    setNewstandardLots('0');
     setMiniLots('0');
     setMicroLots('0');
     // setRiskAmount('');
     setIsCalculated(false);
   };
 
-  const handleAccountBalanceChange = (value: React.SetStateAction<string>) => {
+  const handleAccountBalanceChange = (value: string) => {
     setAccountBalance(value);
+
+    const ab = parseFloat(value) || 0;
+    const rPct = parseFloat(riskPercentage?.replace('%', '') || '0');
+    const ra = parseFloat(riskAmount || '0');
+
+    // Recalculate Risk Amount if user is using Risk %
+    if (riskPercentage && ab > 0) {
+      const newRiskAmount = (ab * rPct) / 100;
+      setRiskAmount(newRiskAmount.toFixed(2));
+    }
+
+    // Or recalc Risk % if user is using Risk Amount
+    if (riskAmount && ab > 0 && !riskPercentage) {
+      const newRiskPct = (ra / ab) * 100;
+      setRiskPercentage(newRiskPct.toFixed(2) + '%');
+    }
+
     resetOutputs();
   };
 
@@ -719,7 +755,11 @@ const Forex = () => {
         if (riskPercentage) {
           await AsyncStorage.setItem('riskPercentage', riskPercentage);
         }
+<<<<<<< Updated upstream
         if (riskAmount){
+=======
+        if (riskAmount) {
+>>>>>>> Stashed changes
           await AsyncStorage.setItem('riskAmount', riskAmount);
         }
       } catch (error) {
@@ -727,7 +767,7 @@ const Forex = () => {
       }
     };
     saveUserInputs();
-  }, [accountBalance, riskPercentage]);
+  }, [accountBalance, riskAmount, riskPercentage]);
 
   // ♻️ Load saved Account Balance and Risk Percentage on startup
   useEffect(() => {
@@ -743,7 +783,11 @@ const Forex = () => {
         if (savedRisk !== null) {
           setRiskPercentage(savedRisk);
         }
+<<<<<<< Updated upstream
         if (savedRiskAmount !== null) {
+=======
+        if (savedRiskAmount) {
+>>>>>>> Stashed changes
           setRiskAmount(savedRiskAmount);
         }
       } catch (error) {
@@ -781,6 +825,7 @@ const Forex = () => {
           setPipValuePerLot('0');
           setUnits('0');
           setStandardLots('0');
+          setNewstandardLots('0');
           setMiniLots('0');
           setMicroLots('0');
           setRrr('0');
@@ -812,6 +857,7 @@ const Forex = () => {
         setPipValuePerLot('0');
         setUnits('0');
         setStandardLots('0');
+        setNewstandardLots('0');
         setMiniLots('0');
         setMicroLots('0');
         setRrr('0');
@@ -862,7 +908,8 @@ const Forex = () => {
 
 
   return (
-    <SafeAreaView className="bg-white dark:bg-black-300 h-full p-4">
+    <SafeAreaProvider>
+    <SafeAreaView className={`p-4 w-full h-full ${isDark ? 'bg-black-300' : 'bg-white'}`} >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -894,73 +941,83 @@ const Forex = () => {
 
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Account Balance</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Account Balance</Text>
             <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md dark:text-white text-black"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Account Balance"
               placeholderTextColor="#374151"
               value={accountBalance}
               onChangeText={handleAccountBalanceChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk %</Text>
-            <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
-              placeholder="Risk in %"
-              placeholderTextColor="#374151"
-              value={riskPercentage}
-              onChangeText={handleRiskPercentageChange}
-              onBlur={() => {
-                if (riskPercentage && !riskPercentage.includes('%')) {
-                  setRiskPercentage(riskPercentage + '%');
-                }
-              }}
-              keyboardType="numeric"
-            />
+            <View className="flex-row justify-between mb-1">
+              <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Risk %</Text>
+              {/* Only show when in Basic Mode */}
+              {!isAdvancedMode && (
+              <Text className={`text-sm font-rubik mb-1 mr-9 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+                {riskAmount !== '0' ? `$${riskAmount}` : ''}
+              </Text>
+              )}
+            </View>
+              <EnhancedTextInput
+                className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
+                placeholder="Risk in %"
+                placeholderTextColor="#374151"
+                value={riskPercentage}
+                onChangeText={handleRiskPercentageChange}
+                onBlur={() => {
+                  if (riskPercentage && !riskPercentage.includes('%')) {
+                    setRiskPercentage(riskPercentage + '%');
+                  }
+                }}
+                keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
+              />
           </View>
         </View>
 
+        {isAdvancedMode && (
         <View className="flex-row gap-4 mb-4">
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk Amount</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Risk Amount</Text>
             <TextInput
-              className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Risk Amount"
               placeholderTextColor="#374151"
               value={riskAmount}
               onChangeText={handleRiskAmountChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss Pips</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Stop Loss Pips</Text>
             <TextInput
-              className="p-4 border border-primary-100 text-center rounded-md text-black dark:text-white"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Stop Loss Pips"
               placeholderTextColor="#374151"
               value={stopLossPips}
               onChangeText={handleStopLossPipsChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
         </View>
+        )}
 
         <View className="flex-row gap-4 mb-2">
           {/* Entry Price Input */}
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Entry Price</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Entry Price</Text>
 
             <View className="relative">
               <TextInput
                 value={entryPrice}
                 onChangeText={handleEntryPriceChange}
-                keyboardType="decimal-pad"
+                keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
                 placeholder="Auto-filled entry price"
-                className="p-4 pr-10 border border-primary-100 rounded-md text-black dark:text-white"
+                className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               />
 
 
@@ -977,14 +1034,14 @@ const Forex = () => {
           </View>
 
           <View className="flex-1">
-            <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss Price</Text>
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Stop Loss Price</Text>
             <EnhancedTextInput
-              className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+              className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
               placeholder="Stop Loss Price"
               placeholderTextColor="#374151"
               value={stopLossPrice}
               onChangeText={handleStopLossPriceChange}
-              keyboardType="numeric"
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
         </View>
@@ -1009,7 +1066,7 @@ const Forex = () => {
           {/* Units Row */}
           <View className="flex-row items-center justify-center border-b border-white px-4 py-3">
             <Text className="text-white font-rubik-bold mr-2">Standard Lots:</Text>
-            <Text className="text-white font-rubik-medium">{standardLots}</Text>
+            <Text className="text-white font-rubik-bold text-lg">{standardLots} ({newstandardLots})</Text>
           </View>
 
           {/* 2x2 Table Grid */}
@@ -1069,12 +1126,13 @@ const Forex = () => {
                       placeholderTextColor="#808080"
                       value={takeProfitPrice}
                       onChangeText={handleTakeProfitChange}
-                      keyboardType="numeric"
+                      keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
                     />
                   </View>
                 </View>
 
                 {/* Bottom Cell - Take Profit Pips */}
+                {isAdvancedMode && (
                 <View className="px-4 py-3 items-center justify-center">
                   <View className="w-full">
                     <TextInput
@@ -1083,10 +1141,11 @@ const Forex = () => {
                       placeholderTextColor="#808080"
                       value={takeProfitPip}
                       onChangeText={handleTakeProfitPipsChange}
-                      keyboardType="numeric"
+                      keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
                     />
                   </View>
                 </View>
+                )}
               </View>
 
               {/* Right Column (EP, Risk, RRR vertically stacked) */}
@@ -1116,6 +1175,7 @@ const Forex = () => {
         )}
       </ScrollView>
     </SafeAreaView>
+    </SafeAreaProvider>
   );
 };
 

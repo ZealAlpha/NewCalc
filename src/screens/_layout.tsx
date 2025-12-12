@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Keyboard, StatusBar } from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { Keyboard } from 'react-native';
 import { BottomTabBarProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RouteProp } from '@react-navigation/native';
+import { SystemBars } from 'react-native-edge-to-edge';
 
 import CustomNavBar from '../navigation/CustomNavBar';
 import Crypto from './crypto';
 import Forex from './forex';
 import Deriv from './deriv';
 import Settings from './settings';
+<<<<<<< Updated upstream
 import Premium from './premium';
+=======
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ThemeContext } from '../components/ThemeContext';
+// import Premium from './premium';
+>>>>>>> Stashed changes
 
 type RootTabParamList = {
   Crypto: undefined;
@@ -26,6 +33,8 @@ type Props = {
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export default function Layout({ route }: Props) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const initialTab = route?.params?.screen ?? 'Crypto'; // default to 'Crypto' if none passed
 
@@ -45,6 +54,7 @@ export default function Layout({ route }: Props) {
 
   return (
     <>
+<<<<<<< Updated upstream
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <Tab.Navigator
         initialRouteName={initialTab}
@@ -59,6 +69,24 @@ export default function Layout({ route }: Props) {
         <Tab.Screen name="Settings" component={Settings} />
         <Tab.Screen name="Premium" component={Premium} />
       </Tab.Navigator>
+=======
+      <SafeAreaView className={`w-full h-full ${isDark ? 'bg-black-300' : 'bg-white'}`}>
+        <SystemBars style="dark" />
+        <Tab.Navigator
+          initialRouteName={initialTab}
+          screenOptions={{ headerShown: false }}
+          tabBar={(props: BottomTabBarProps) => (
+            <CustomNavBar {...props} keyboardVisible={keyboardVisible} />
+          )}
+        >
+          <Tab.Screen name="Crypto" component={Crypto} />
+          <Tab.Screen name="Forex" component={Forex} />
+          <Tab.Screen name="Deriv" component={Deriv} />
+          <Tab.Screen name="Settings" component={Settings} />
+          {/*<Tab.Screen name="Premium" component={Premium} />*/}
+        </Tab.Navigator>
+      </SafeAreaView>
+>>>>>>> Stashed changes
     </>
   );
 }

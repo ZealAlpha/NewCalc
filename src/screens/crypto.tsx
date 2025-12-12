@@ -10,20 +10,58 @@ import {
     StyleSheet,
     Platform
 } from 'react-native';
+<<<<<<< Updated upstream
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView } from "react-native-safe-area-context";
+=======
+import React, { useEffect, useState, useRef, useContext } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+>>>>>>> Stashed changes
 import images from "../constants/images.ts";
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import Clipboard from '@react-native-clipboard/clipboard';
 <<<<<<< HEAD
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSettings } from '../context/SettingsContext.tsx';
+<<<<<<< Updated upstream
 =======
 >>>>>>> parent of 4973ed4 (Latest October)
 
 const Crypto = () => {
 
     const [activeTab, setActiveTab] = useState('Long');
+=======
+import { ThemeContext } from '../components/ThemeContext';
+
+const Crypto = () => {
+
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
+
+  const formatNumber = (value: string) => {
+    if (!value) return "";
+
+    // Remove commas
+    const cleaned = value.replace(/,/g, "");
+
+    // Allow only digits and dot
+    if (!/^\d*\.?\d*$/.test(cleaned)) return value;
+
+    // Split integer and decimal part
+    const [intPart, decPart] = cleaned.split(".");
+
+    // Add commas to integer part
+    const formattedInt = Number(intPart || 0).toLocaleString();
+
+    // If user typed a dot but no decimals yet, preserve it
+    if (decPart === undefined) return formattedInt;
+
+    return `${formattedInt}.${decPart}`;
+  };
+
+
+  const [activeTab, setActiveTab] = useState('Long');
+>>>>>>> Stashed changes
 
     const [formData, setFormData] = useState({
         capital: '',
@@ -42,7 +80,13 @@ const Crypto = () => {
         manualLeverage: '0',
     });
 
+<<<<<<< Updated upstream
     const [lastEdited, setLastEdited] = useState<'leverage' | 'tradeAmount' | null>(null);
+=======
+
+
+  const [, setLastEdited] = useState<'leverage' | 'tradeAmount' | null>(null);
+>>>>>>> Stashed changes
 
   const { showRiskRewardSection } = useSettings();
 
@@ -64,6 +108,7 @@ const Crypto = () => {
     }
   };
 
+<<<<<<< Updated upstream
     function calculatePosition(updatedFormData: typeof formData, fieldChanged?: 'leverage' | 'tradeAmount') {
         const entry = parseFloat(updatedFormData.entryPrice) || 0;
         const stopLoss = parseFloat(updatedFormData.stopLoss) || 0;
@@ -82,6 +127,45 @@ const Crypto = () => {
             });
             return;
         }
+=======
+  const handleInputChange = async (key: string, value: string) => {
+    // Remove comma formatting
+    const cleanedValue = value.replace(/,/g, '');
+
+    // Update form
+    const updated = { ...formData, [key]: cleanedValue };
+    setFormData(updated);
+
+    // Trigger calculation exactly like your manual handler
+    calculatePosition(updated);
+
+    // Persist clean version (optional but matches your existing behavior)
+    await AsyncStorage.setItem('forexFormData', JSON.stringify(updated));
+  };
+
+  const handleTradeAmountChange = (value: string) => {
+    setLastEdited('tradeAmount');
+
+    // Remove commas for processing
+    let cleaned = value.replace(/,/g, '');
+
+    // Convert to absolute number
+    if (cleaned !== '' && !isNaN(parseFloat(cleaned))) {
+      cleaned = Math.abs(Number(cleaned)).toString();
+    }
+
+    // Update state with clean numeric value
+    const updated = { ...formData, tradeAmount: cleaned };
+    setFormData(updated);
+
+    // Recalculate passing the special flag
+    calculatePosition(updated, 'tradeAmount');
+
+    // Save clean version
+    AsyncStorage.setItem('forexFormData', JSON.stringify(updated));
+  };
+
+>>>>>>> Stashed changes
 
 <<<<<<< HEAD
   // Check if all required fields are filled for take profit calculation
@@ -102,6 +186,7 @@ const Crypto = () => {
         const positionSize = riskAmount / dsl;
 >>>>>>> parent of 4973ed4 (Latest October)
 
+<<<<<<< Updated upstream
         let leverage = 0;
         let manualTradeAmount = 0;
 
@@ -111,8 +196,136 @@ const Crypto = () => {
         } else if (fieldChanged === 'leverage') {
             manualTradeAmount = leverageInput !== 0 ? positionSize / leverageInput : 0;
             leverage = leverageInput;
+=======
+    // ✅ Always compute risk amount first (depends only on capital & risk)
+    const riskAmount = capital && risk ? (risk / 100) * capital : 0;
+
+    // ✅ Always reflect this in the result state, even if other fields are empty
+    setResult(prev => ({
+      ...prev,
+      riskValue: riskAmount.toFixed(0),
+    }));
+
+    // Stop further calculations if required fields are missing
+    if (!entry || !stopLoss || !capital || !risk) {
+      return;
+    }
+
+    // Proceed with full calculations below
+    const dsl =
+      activeTab === 'Long'
+        ? (entry - stopLoss) / entry
+        : (stopLoss - entry) / entry;
+
+    const positionSize = riskAmount / dsl;
+
+    let leverage = 0;
+    let manualTradeAmount = 0;
+
+    if (fieldChanged === 'tradeAmount') {
+      leverage = tradeAmount !== 0 ? positionSize / tradeAmount : 0;
+      manualTradeAmount = tradeAmount;
+    } else if (fieldChanged === 'leverage') {
+      manualTradeAmount = leverageInput !== 0 ? positionSize / leverageInput : 0;
+      leverage = leverageInput;
+    }
+
+    // Calculate take profit metrics only if basic fields are filled and take profit is entered
+    let rrr = '0';
+    let expectedProfit = '0';
+
+    // Entry must be between SL and TP (in either direction)
+    const isValidEntry = (stopLoss < entry && entry < takeProfitAmount) ||
+      (takeProfitAmount < entry && entry < stopLoss);
+
+    if (isValidEntry) {
+      const rrrValue = Math.abs((takeProfitAmount - entry) / (entry - stopLoss));
+      const expectedProfitValue = rrrValue * riskAmount;
+      rrr = rrrValue.toFixed(2);
+      expectedProfit = expectedProfitValue.toFixed(0);
+    } else {
+      rrr = 'Error';
+      expectedProfit = 'Error';
+    }
+
+    // ✅ Update the result
+    setResult({
+      dsl: dsl.toFixed(5),
+      positionSize: positionSize.toFixed(0),
+      leverage: leverage.toFixed(1) + 'x',
+      manualTradeAmount: manualTradeAmount.toFixed(1),
+      manualLeverage: leverage.toFixed(1) + 'x',
+      rrr,
+      ep: expectedProfit,
+      riskValue: riskAmount.toFixed(0),
+    });
+
+    // ✅ Reflect calculated counterpart in form - ENSURE POSITIVE VALUES
+    if (fieldChanged === 'tradeAmount') {
+      setFormData(prev => ({ ...prev, leverage: Math.abs(leverage).toFixed(1) }));
+    } else if (fieldChanged === 'leverage') {
+      setFormData(prev => ({ ...prev, tradeAmount: Math.abs(manualTradeAmount).toFixed(1) }));
+    }
+  }
+
+
+  const lastPress = useRef(0);
+  const singlePressTimer = useRef(null);
+
+  const handleReset = () => {
+    const now = Date.now();
+    const DOUBLE_PRESS_DELAY = 300;
+    if (now - lastPress.current < DOUBLE_PRESS_DELAY) {
+      // 👇 Double-tap detected → clear timeout & clear AsyncStorage too
+      if (singlePressTimer.current) {
+        clearTimeout(singlePressTimer.current);
+        singlePressTimer.current = null;
+      }
+
+      (async () => {
+        await AsyncStorage.removeItem('forexFormData');
+        setFormData({
+          takeProfit: '',
+          capital: '',
+          risk: '',
+          entryPrice: '',
+          stopLoss: '',
+          tradeAmount: '',
+          leverage: ''
+        });
+        setResult({
+          riskValue: '0',
+          ep: '0',
+          rrr: '0',
+          dsl: '0',
+          positionSize: '0',
+          leverage: '0',
+          manualTradeAmount: '0',
+          manualLeverage: '0'
+        });
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('All saved data has been removed.', ToastAndroid.SHORT);
+        } else {
+          Alert.alert('Data Cleared', 'All saved data has been removed.');
+>>>>>>> Stashed changes
         }
 
+<<<<<<< Updated upstream
+=======
+      lastPress.current = 0; // Reset to prevent triple-tap issues
+    } else {
+      // 👇 Potential single tap → wait to see if double-tap comes
+      singlePressTimer.current = setTimeout(() => {
+        setFormData(prev => ({
+          takeProfit: '',
+          capital: prev.capital,
+          risk: prev.risk,
+          entryPrice: '',
+          stopLoss: '',
+          tradeAmount: '',
+          leverage: ''
+        }));
+>>>>>>> Stashed changes
         setResult({
             dsl: dsl.toFixed(5),
             positionSize: positionSize.toFixed(0),
@@ -161,21 +374,29 @@ const Crypto = () => {
       {/* Row 1 */}
       <View className="flex-row gap-4">
         <View className="flex-1">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Capital</Text>
+          <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Capital</Text>
           <TextInput
-            className="p-4 border border-primary-100 rounded-md dark:text-white text-black"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Your Capital"
             placeholderTextColor="#374151"
-            value={formData.capital}
-            onChangeText={(value) => handleInputChange('capital', value)}
-            keyboardType="numeric"
+            value={formatNumber(formData.capital)}
+            onChangeText={(val) => handleInputChange('capital', val)}
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
 
         <View className="flex-1">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Risk %</Text>
+          {/* Labels Row */}
+          <View className="flex-row justify-between mb-1">
+            <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Risk %</Text>
+            <Text className={`text-sm font-rubik mb-1 mr-9 ${isDark ? 'text-white' : 'text-gray-700'}`}>
+              {result.riskValue !== '0' ? `$${result.riskValue}` : ''}
+            </Text>
+          </View>
+
+          {/* Input Field */}
           <TextInput
-            className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Risk in %"
             placeholderTextColor="#374151"
             value={formData.risk}
@@ -186,7 +407,7 @@ const Crypto = () => {
                 handleInputChange('risk', updatedRisk);
               }
             }}
-            keyboardType="numeric"
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
       </View>
@@ -194,34 +415,36 @@ const Crypto = () => {
       {/* Row 2 */}
       <View className="flex-row gap-4 mt-4">
         <View className="flex-1">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Entry Price</Text>
+          <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Entry Price</Text>
           <TextInput
-            className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Entry Price"
             placeholderTextColor="#374151"
-            value={formData.entryPrice}
-            onChangeText={(value) => {
-              const updated = { ...formData, entryPrice: value };
-              setFormData(updated);
-              calculatePosition(updated);
-            }}
-            keyboardType="numeric"
+            value={formatNumber(formData.entryPrice)}
+            onChangeText={(val) => handleInputChange('entryPrice', val)}
+            // onChangeText={(value) => {
+            //   const updated = { ...formData, entryPrice: value };
+            //   setFormData(updated);
+            //   calculatePosition(updated);
+            // }}
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
 
         <View className="flex-1 mb-3">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Stop Loss</Text>
+          <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Stop Loss</Text>
           <TextInput
-            className="p-4 border border-primary-100 rounded-md text-black dark:text-white"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Stop Loss"
             placeholderTextColor="#374151"
-            value={formData.stopLoss}
-            onChangeText={(value) => {
-              const updated = { ...formData, stopLoss: value };
-              setFormData(updated);
-              calculatePosition(updated);
-            }}
-            keyboardType="numeric"
+            value={formatNumber(formData.stopLoss)}
+            // onChangeText={(value) => {
+            //   const updated = { ...formData, stopLoss: value };
+            //   setFormData(updated);
+            //   calculatePosition(updated);
+            // }}
+            onChangeText={(val) => handleInputChange('stopLoss', val)}
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
       </View>
@@ -234,7 +457,7 @@ const Crypto = () => {
             activeOpacity={0.7}
             className="items-center justify-center"
           >
-          <Text className="text-3xl dark:text-white mr-2">{Math.abs(Number(result.positionSize))}</Text>
+          <Text className={`text-3xl mr-2 ${isDark ? 'text-white' : 'text-gray-700'}`}>{Math.abs(Number(result.positionSize))}</Text>
           <Text className="text-center text-secondary-100 dark:text-white text-sm">Position Size</Text>
           </TouchableOpacity>
         </View>
@@ -248,26 +471,14 @@ const Crypto = () => {
 
       <View className="flex-row gap-4 mt-4 mb-9">
         <View className="flex-1">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Trade Amount</Text>
+          <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Trade Amount</Text>
           <TextInput
-            className="p-4 border border-primary-100 rounded-md dark:text-white text-black"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Trade Amount"
             placeholderTextColor="#374151"
-            value={formData.tradeAmount}
-            onChangeText={(value) => {
-              setLastEdited('tradeAmount');
-
-              // Convert to absolute value immediately
-              let processedValue = value;
-              if (value !== '' && !isNaN(parseFloat(value))) {
-                processedValue = Math.abs(parseFloat(value)).toString();
-              }
-
-              const updated = { ...formData, tradeAmount: processedValue };
-              setFormData(updated);
-              calculatePosition(updated, 'tradeAmount');
-            }}
-            keyboardType="numeric"
+            value={formatNumber(formData.tradeAmount)}
+            onChangeText={handleTradeAmountChange}
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
 
@@ -276,9 +487,9 @@ const Crypto = () => {
         </View>
 
         <View className="flex-1">
-          <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Leverage</Text>
+          <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Leverage</Text>
           <TextInput
-            className="p-4 border border-primary-100 rounded-md dark:text-white text-black"
+            className={`p-4 border border-primary-100 rounded-md ${isDark ? 'text-white' : 'text-black'}`}
             placeholder="Leverage"
             placeholderTextColor="#374151"
             value={formData.leverage}
@@ -295,7 +506,7 @@ const Crypto = () => {
               setFormData(updated);
               calculatePosition(updated, 'leverage');
             }}
-            keyboardType="numeric"
+            keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
           />
         </View>
       </View>
@@ -311,13 +522,15 @@ const Crypto = () => {
               className="p-4 border border-accent-100 rounded-xl text-white text-center"
               placeholder="Take Profit Price"
               placeholderTextColor="#808080"
-              value={formData.takeProfit}
-              onChangeText={(value) => {
-                const updated = { ...formData, takeProfit: value };
-                setFormData(updated);
-                calculatePosition(updated);
-              }}
-              keyboardType="numeric"
+              value={formatNumber(formData.takeProfit)}
+              onChangeText={(val) => handleInputChange('takeProfit', val)}
+
+              // onChangeText={(value) => {
+              //   const updated = { ...formData, takeProfit: value };
+              //   setFormData(updated);
+              //   calculatePosition(updated);
+              // }}
+              keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
             />
           </View>
 
@@ -449,6 +662,7 @@ const Crypto = () => {
                 </View>
             </View>
 
+<<<<<<< Updated upstream
             <View className="mt-4 items-center justify-center flex-row">
                 <View className="items-center justify-center mr-2">
                     <Text className="text-3xl dark:text-white mr-2">{Math.abs(Number(result.positionSize))}</Text>
@@ -459,6 +673,15 @@ const Crypto = () => {
                 </TouchableOpacity>
             </View>
 >>>>>>> parent of 4973ed4 (Latest October)
+=======
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView
+        className={`flex-1 ${isDark ? 'bg-black-300' : 'bg-white'}`}
+        edges={['right', 'left']} // Only apply safe area to sides, not top/bottom
+      >
+      <ScrollView contentContainerClassName="p-4">
+>>>>>>> Stashed changes
 
             <View className="flex-row gap-4 mt-4">
                 <View className="flex-1">
@@ -529,9 +752,17 @@ const Crypto = () => {
         </>
     );
 
+<<<<<<< Updated upstream
     return (
         <SafeAreaView className="bg-white dark:bg-black-300 h-full">
             <ScrollView contentContainerClassName="p-4">
+=======
+        {/* Active Tab Content */}
+        <View>{renderInputs()}</View>
+      </ScrollView>
+      </SafeAreaView>
+    </SafeAreaProvider>
+>>>>>>> Stashed changes
 
                 <View className="mb-9">
                     <Image source={images.logo} className="w-full h-32" resizeMode="contain" />

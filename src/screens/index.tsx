@@ -44,7 +44,7 @@ const Index = () => {
 
               {/* Crypto Button */}
               <Pressable
-                // Help me Push this one to the Crypto page
+                // Help me Push this one to the Deriv page
                 onPress={() => navigation.navigate('Layout', { screen: 'Deriv' })}
                 className="bg-red-600 px-6 py-4 rounded-2xl w-3/4 items-center"
               >

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import FontAwesome6 from '@react-native-vector-icons/fontawesome6';
+import { ThemeContext } from './ThemeContext.tsx';
 
 type Props = {
   currencyPair: string;
@@ -26,6 +27,8 @@ type CurrencyItem = {
 };
 
 export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fetchExchangeRate }: Props) {
+  const { theme } = useContext(ThemeContext);
+  const isDark = theme === 'dark';
   const [modalVisible, setModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<
     'All' | 'Volatility' | 'Boom & Crash' | 'Jump Indices' | 'Step Index' | 'Hybrid Indices' | 'Others'
@@ -215,13 +218,13 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
 
   return (
     <View className="flex-1 justify-center">
-      <Text className="text-sm font-rubik text-gray-700 dark:text-white mb-1">Instrument</Text>
+      <Text className={`text-sm font-rubik mb-1 ${isDark ? 'text-white' : 'text-gray-700'}`}>Instrument</Text>
 
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
-        className="border border-orange-500 p-4 rounded bg-white dark:bg-black-300"
+        className={`border border-orange-500 p-4 rounded ${isDark ? 'bg-black-300' : 'bg-white'}`}
       >
-        <Text className="text-gray-800 dark:text-white">
+        <Text className={`${isDark ? 'text-white' : 'text-gray-800'}`}>
           {currencyPair ? getDisplayLabel(currencyPair) : 'Select Pair'}
         </Text>
       </TouchableOpacity>
@@ -229,7 +232,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
       <Modal visible={modalVisible} animationType="slide" transparent>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
           <View className="flex-1 bg-black/60 justify-center items-center">
-            <View className="w-11/12 bg-white dark:bg-black-300 p-4 rounded-xl max-h-[80%]">
+            <View className={`w-11/12  p-4 rounded-xl max-h-[80%] ${isDark ? 'bg-black-300' : 'bg-white'}`}>
               {/* Tabs */}
               <View className="flex-row justify-around mb-4">
 <<<<<<< HEAD
@@ -261,7 +264,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
 
               {/* Search */}
               <TextInput
-                className="border border-gray-300 rounded px-3 py-2 mb-4 dark:text-white"
+                className={`border border-gray-300 rounded px-3 py-2 mb-4 ${isDark ? 'text-white' : 'text-gray-800'}`}
                 placeholder="Search pairs"
                 placeholderTextColor="#374151"
                 value={searchTerm}
@@ -284,7 +287,7 @@ export default function CustomCurrencyPicker({ currencyPair, setCurrencyPair, fe
                     }}
                   >
                     <View>
-                      <Text className="text-base text-gray-700 dark:text-white">
+                      <Text className={`text-base ${isDark ? 'text-white' : 'text-gray-700'}`}>
                         {item.label}
                       </Text>
                       {item.description && (

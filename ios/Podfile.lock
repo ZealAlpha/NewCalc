@@ -1656,7 +1656,15 @@ PODS:
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
     - SocketRocket
+<<<<<<< Updated upstream
   - react-native-safe-area-context (5.6.0):
+=======
+  - react-native-in-app-review (4.4.2):
+    - React-Core
+  - react-native-netinfo (11.4.1):
+    - React-Core
+  - react-native-safe-area-context (5.6.1):
+>>>>>>> Stashed changes
     - boost
     - DoubleConversion
     - fast_float
@@ -2716,6 +2724,11 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+<<<<<<< Updated upstream
+=======
+  - react-native-in-app-review (from `../node_modules/react-native-in-app-review`)
+  - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
+>>>>>>> Stashed changes
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-vector-icons-evil-icons (from `../node_modules/@react-native-vector-icons/evil-icons`)"
   - "react-native-vector-icons-fontawesome (from `../node_modules/@react-native-vector-icons/fontawesome`)"
@@ -2854,6 +2867,13 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+<<<<<<< Updated upstream
+=======
+  react-native-in-app-review:
+    :path: "../node_modules/react-native-in-app-review"
+  react-native-netinfo:
+    :path: "../node_modules/@react-native-community/netinfo"
+>>>>>>> Stashed changes
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-vector-icons-evil-icons:
@@ -2989,7 +3009,13 @@ SPEC CHECKSUMS:
   React-logger: 984ebd897afad067555d081deaf03f57c4315723
   React-Mapbuffer: 0c045c844ce6d85cde53e85ab163294c6adad349
   React-microtasksnativemodule: d9499269ad1f484ae71319bac1d9231447f2094e
+<<<<<<< Updated upstream
   react-native-safe-area-context: b84e3cefd1ec3d38aa1d8bfbc2a15400ffe05181
+=======
+  react-native-in-app-review: 1516ba69d60d58053b7eb3aaaf8d2a5a74af8b57
+  react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
+  react-native-safe-area-context: 8ed800930eb7d0b6651218f69656e823d37b6ef7
+>>>>>>> Stashed changes
   react-native-vector-icons-evil-icons: 74d1fe2b104d1b4286359313713c7a4a9dcef1be
   react-native-vector-icons-fontawesome: c41fd08991989b71fe79c68ebb3ee30ac221178e
   react-native-vector-icons-fontawesome6: 1b667969bef2f430d1d7515163b980b856f58670
