@@ -164,13 +164,6 @@ const Forex = () => {
           const pairA = `${accountCurrency}${quoteCurrency}`;
           const pairB = `${quoteCurrency}${accountCurrency}`; // fallback (invert)
 
-          console.log('🔴 FETCHING INDEX CONVERSION RATE');
-          console.log('Index:', originalPair);
-          console.log('Quote Currency:', quoteCurrency);
-          console.log('Account Currency:', accountCurrency);
-          console.log('Trying pairA first:', pairA);
-          console.log('Fallback pairB:', pairB);
-
           let er = 1;
           // try preferred pair first
           try {
@@ -304,21 +297,11 @@ const Forex = () => {
     } else if (isIndices) {
       // @ts-ignore
       const indexQuoteCurrency = indicesQuoteCurrencies[currencyPair];
-      console.log('🔵 INSIDE INDICES PIP VALUE CALCULATION');
-      console.log('indexQuoteCurrency:', indexQuoteCurrency);
-      console.log('accountCurrency:', accountCurrency);
-      console.log('IndicesExchangeRate:', IndicesExchangeRate);
-      console.log('Match?', accountCurrency === indexQuoteCurrency);
       if (accountCurrency === indexQuoteCurrency) {
         pipValue = 0.01;
-<<<<<<< Updated upstream
-        console.log('✅ Same currency, pipValue = 0.01');
-=======
->>>>>>> Stashed changes
       } else {
         const exchangeRate = IndicesExchangeRate ?? 1;
         pipValue = 0.01 / exchangeRate;
-        console.log('✅ Different currency, exchangeRate:', exchangeRate, 'pipValue:', pipValue);
       }
     } else if (isJPYQuote) {
       // Existing JPY quote logic
@@ -391,10 +374,6 @@ const Forex = () => {
     } else {
       setPipValuePerLot(pipValue.toFixed(4));
     }
-<<<<<<< Updated upstream
-    // setPipValuePerLot(pipValue.toFixed(8));
-=======
->>>>>>> Stashed changes
   }, [currencyPair, entryPrice, accountCurrency, quoteToAccountRate, IndicesExchangeRate, indicesQuoteCurrencies, indicesPairs, getQuoteCurrency]);
 
   const toNumeric = (s: string) => {
@@ -537,18 +516,7 @@ const Forex = () => {
       setMicroLots('0');
     }
     setIsCalculated(true);
-
-    console.log('=== DEBUG INFO ===');
-    console.log('currencyPair:', currencyPair);
-    console.log('accountCurrency:', accountCurrency);
-    console.log('isIndices:', isIndices);
-    console.log('IndicesExchangeRate:', IndicesExchangeRate);
-    // @ts-ignore
-    console.log('indexQuoteCurrency:', indicesQuoteCurrencies[currencyPair]);
-    console.log('pipValuePerLot from state:', pipValuePerLot);
-    console.log('pv in calculation:', pv);
-    console.log('==================');
-  }, [accountBalance, riskPercentage, riskAmount, stopLossPips, pipValuePerLot, entryPrice, stopLossPrice, currencyPair, getQuoteCurrency, takeProfitPrice, takeProfitPip, accountCurrency, IndicesExchangeRate, indicesQuoteCurrencies]);
+  }, [accountBalance, riskPercentage, riskAmount, stopLossPips, pipValuePerLot, entryPrice, stopLossPrice, currencyPair, takeProfitPrice, takeProfitPip, getQuoteCurrency]);
 
 
   const resetOutputs = () => {
@@ -582,6 +550,7 @@ const Forex = () => {
 
     resetOutputs();
   };
+
 
   const handleTakeProfitChange = (value: string) => {
     setTakeProfitPrice(value);
@@ -755,11 +724,7 @@ const Forex = () => {
         if (riskPercentage) {
           await AsyncStorage.setItem('riskPercentage', riskPercentage);
         }
-<<<<<<< Updated upstream
-        if (riskAmount){
-=======
         if (riskAmount) {
->>>>>>> Stashed changes
           await AsyncStorage.setItem('riskAmount', riskAmount);
         }
       } catch (error) {
@@ -783,11 +748,7 @@ const Forex = () => {
         if (savedRisk !== null) {
           setRiskPercentage(savedRisk);
         }
-<<<<<<< Updated upstream
-        if (savedRiskAmount !== null) {
-=======
         if (savedRiskAmount) {
->>>>>>> Stashed changes
           setRiskAmount(savedRiskAmount);
         }
       } catch (error) {
@@ -831,9 +792,13 @@ const Forex = () => {
           setRrr('0');
           setXp('0');
           setTakeProfitPrice('');
+          setTakeProfitPip('');
           setIsEntryPriceManuallyEdited(false);
           setQuoteToAccountRate('1');
+          setTakeProfitPrice('');
           setTakeProfitPip('0');
+          setRrr('0');
+          setXp('0');
 
           if (Platform.OS === 'android') {
             ToastAndroid.show('All saved data has been removed.', ToastAndroid.SHORT);
@@ -868,6 +833,8 @@ const Forex = () => {
         setQuoteToAccountRate('1');
         setTakeProfitPrice('');
         setTakeProfitPip('0');
+        setRrr('0');
+        setXp('0');
 
         if (Platform.OS === 'android') {
           ToastAndroid.show('Fields cleared (saved data preserved).', ToastAndroid.SHORT);
