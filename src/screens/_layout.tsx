@@ -18,7 +18,7 @@ type RootTabParamList = {
   Forex: undefined;
   Deriv: undefined;
   Settings: undefined;
-  // Premium: undefined;
+  Premium: undefined;
 };
 
 // Accept route prop to receive screen info from parent stack

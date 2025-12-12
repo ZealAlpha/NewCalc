@@ -5,7 +5,6 @@ import Animated, {FadeIn, FadeOut, LinearTransition} from 'react-native-reanimat
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 import { Image } from 'react-native';
-import { JSX } from 'react';
 
 const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -87,7 +86,6 @@ const CustomNavBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
 }
 
 const styles = StyleSheet.create({
-<<<<<<< Updated upstream
     container: {
         position: 'absolute',
         flexDirection: 'row',
@@ -101,23 +99,6 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 15,
         shadowColor: "#000",
-=======
-  container: {
-    position: 'absolute',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: PRIMARY_COLOR,
-    width: '85%', //adjust here for the width of the navigation bar
-    alignSelf: 'center',
-    bottom: 10,
-    borderRadius: 40,
-    paddingVertical: 12,
-    paddingHorizontal: 15,
-    ...(Platform.OS === 'ios'
-      ? {
-        shadowColor: '#000',
->>>>>>> Stashed changes
         shadowOffset: { width: 0, height: 5 },
         shadowOpacity: 0.3,
         shadowRadius: 5,
