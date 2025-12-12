@@ -30,11 +30,8 @@
     "react-native": "0.80.1",
     "react-native-base64": "^0.2.1",
     "react-native-gesture-handler": "^2.27.1",
-<<<<<<< Updated upstream
-=======
     "react-native-in-app-review": "^4.4.2",
     "react-native-rate": "^1.2.12",
->>>>>>> Stashed changes
     "react-native-reanimated": "^4.0.2",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.11.1",
