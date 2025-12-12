@@ -29,6 +29,7 @@
     "react": "19.1.0",
     "react-native": "0.80.1",
     "react-native-base64": "^0.2.1",
+    "react-native-edge-to-edge": "^1.7.0",
     "react-native-gesture-handler": "^2.27.1",
     "react-native-in-app-review": "^4.4.2",
     "react-native-rate": "^1.2.12",
